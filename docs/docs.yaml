@@ -1,0 +1,155 @@
+openapi: 3.0.3
+info:
+  title: API Inventario
+  version: 1.0.0
+  description: >
+    Microservicio de vendedores e inventario
+
+paths:
+  /inventario/{sku}:
+    get:
+      summary: Consultar stock de un producto
+      parameters:
+        - in: path
+          name: sku
+          required: true
+          schema:
+            type: string
+          description: Identificador del producto (SKU)
+      responses:
+        '200':
+          description: Stock encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoInventario'
+        '404':
+          description: Producto no encontrado
+
+  /inventario/reservar:
+    post:
+      summary: Reservar stock para una orden (inicio de checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_orden:
+                  type: string
+                sku:
+                  type: string
+                cantidad:
+                  type: integer
+              required: [id_orden, sku, cantidad]
+              example:
+                id_orden: "123"
+                sku: "456"
+                cantidad: 2
+      responses:
+        '201':
+          description: Reserva creada con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  reserva:
+                    $ref: '#/components/schemas/ProductoInventario'
+                  cantidad_reservada:
+                    type: integer
+                required:
+                  - success
+                  - reserva
+                  - cantidad_reservada
+              example:
+                success: true
+                reserva:
+                  sku: "456"
+                  tienda_id: "5678"
+                  stock: 10
+                cantidad_reservada: 2
+        '400':
+          description: Cantidad inválida
+        '409':
+          description: Stock insuficiente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: string
+              example:
+                success: false
+                error: "Stock insuficiente"
+
+  /inventario/confirmar:
+    patch:
+      summary: Confirmar reserva de stock tras pago exitoso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_orden:
+                  type: string
+              required: [id_orden]
+              example:
+                id_orden: "123"
+      responses:
+        '200':
+          description: Reserva confirmada
+        '404':
+          description: Orden no encontrada o reserva expirada
+
+  /inventario/cancelar:
+    patch:
+      summary: Cancelar reserva de stock (pago fallido o timeout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_orden:
+                  type: string
+              required: [id_orden]
+              example:
+                id_orden: "123"
+      responses:
+        '200':
+          description: Reserva cancelada, stock devuelto
+        '404':
+          description: Reserva no encontrada
+
+components:
+  schemas:
+    ProductoInventario:
+      type: object
+      properties:
+        sku:
+          type: string
+          description: Identificador único del producto en el inventario
+        tienda_id:
+          type: string
+          description: Identificador de la tienda a la que pertenece el producto
+        stock:
+          type: integer
+          description: Cantidad disponible
+      required:
+        - sku
+        - tienda_id
+        - stock
+      example:
+        sku: "123"
+        tienda_id: "5678"
+        stock: 234
