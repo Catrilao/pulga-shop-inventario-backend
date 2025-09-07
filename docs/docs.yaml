@@ -4,152 +4,367 @@ info:
   version: 1.0.0
   description: >
     Microservicio de vendedores e inventario
+tags:
+  - name: Productos
+    description: Gestión de productos y stock
+  - name: Reservas
+    description: Gestión de reservas de stock durante el checkout
+  - name: Tiendas
+    description: Gestión de tiendas
 
 paths:
-  /inventario/{sku}:
+  /productos:
+    put:
+      tags:
+        - Productos
+      summary: Añadir producto y setear stock
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoPut'
+      responses:
+        '201':
+          description: Producto añadido con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoGet'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: VALIDACION_STOCK
+                message: El stock debe ser un número entero mayor o igual a cero
+        '401':
+          description: Acceso denegado
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: Sesión no iniciada
+        '409':
+          description: Conflicto. Producto ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: PRODUCTO_DUPLICADO
+                message: El producto con SKU 123 ya está registrado
+      security:
+        - bearerAuth: []
+
+  /productos/{sku}:
     get:
-      summary: Consultar stock de un producto
+      tags:
+        - Productos
+      summary: Consultar datos de un producto
       parameters:
-        - in: path
-          name: sku
-          required: true
-          schema:
-            type: string
-          description: Identificador del producto (SKU)
+        - $ref: '#/components/parameters/skuParam'
       responses:
         '200':
           description: Stock encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductoInventario'
+                $ref: '#/components/schemas/ProductoGet'
         '404':
           description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: PRODUCTO_NO_ENCONTRADO
+                message: El producto con SKU 123 no fue encontrado
 
-  /inventario/reservar:
+    patch:
+      tags:
+        - Productos
+      summary: Actualizar datos del producto
+      parameters:
+        - $ref: '#/components/parameters/skuParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoPatch'
+      responses:
+        '204':
+          description: Stock actualizado con exito
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: DATOS_ERRONEOS
+                message: El stock debe ser mayor o igual a cero
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: No tienes permisos para editar este producto
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: PRODUCTO_NO_ENCONTRADO
+                message: El producto con SKU 123 no fue encontrado
+      security:
+        - bearerAuth: []
+
+  /reservas:
     post:
+      tags:
+        - Reservas
       summary: Reservar stock para una orden (inicio de checkout)
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                id_orden:
-                  type: string
-                sku:
-                  type: string
-                cantidad:
-                  type: integer
-              required: [id_orden, sku, cantidad]
-              example:
-                id_orden: "123"
-                sku: "456"
-                cantidad: 2
+              $ref: '#/components/schemas/ReservaRequest'
       responses:
         '201':
           description: Reserva creada con éxito
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  reserva:
-                    $ref: '#/components/schemas/ProductoInventario'
-                  cantidad_reservada:
-                    type: integer
-                required:
-                  - success
-                  - reserva
-                  - cantidad_reservada
-              example:
-                success: true
-                reserva:
-                  sku: "456"
-                  tienda_id: "5678"
-                  stock: 10
-                cantidad_reservada: 2
+                $ref: '#/components/schemas/ReservaResponse'
         '400':
-          description: Cantidad inválida
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: DATOS_ERRONEOS
+                message: La cantidad debe ser mayor a cero
         '409':
           description: Stock insuficiente
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  error:
-                    type: string
+                $ref: '#/components/schemas/Error'
               example:
-                success: false
-                error: "Stock insuficiente"
+                code: STOCK_INSUFICIENTE
+                message: No hay stock suficiente de este producto
 
-  /inventario/confirmar:
+  /reservas/{id_orden}/confirmar:
     patch:
+      tags:
+        - Reservas
       summary: Confirmar reserva de stock tras pago exitoso
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id_orden:
-                  type: string
-              required: [id_orden]
-              example:
-                id_orden: "123"
+      parameters:
+        - $ref: '#/components/parameters/idOrden'
       responses:
         '200':
           description: Reserva confirmada
         '404':
           description: Orden no encontrada o reserva expirada
-
-  /inventario/cancelar:
-    patch:
-      summary: Cancelar reserva de stock (pago fallido o timeout)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id_orden:
-                  type: string
-              required: [id_orden]
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
               example:
-                id_orden: "123"
+                code: RESERVA_NO_ENCONTRADA
+                message: La reserva con ID 123 no fue encontrada
+
+  /reservas/{id_orden}/cancelar:
+    patch:
+      tags:
+        - Reservas
+      summary: Cancelar reserva de stock (pago fallido o timeout)
+      parameters:
+      - $ref: '#/components/parameters/idOrden'
       responses:
         '200':
           description: Reserva cancelada, stock devuelto
         '404':
-          description: Reserva no encontrada
+          description: Orden no encontrada o reserva expirada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: RESERVA_NO_ENCONTRADA
+                message: La reserva con ID 123 no fue encontrada
 
 components:
   schemas:
-    ProductoInventario:
+    ProductoGet:
       type: object
       properties:
         sku:
           type: string
-          description: Identificador único del producto en el inventario
         tienda_id:
           type: string
-          description: Identificador de la tienda a la que pertenece el producto
         stock:
           type: integer
-          description: Cantidad disponible
+        precio:
+          type: integer
+        disponible:
+          type: boolean
+          description: > 
+            Flag manual que permite al vendedor pausar o publicar un producto.
+            Este campo no depende del stock.
+            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones:
+            - disponible = true
+            - stock > 0
       required:
         - sku
         - tienda_id
         - stock
+        - precio
+        - disponible
       example:
         sku: "123"
         tienda_id: "5678"
         stock: 234
+        precio: 12000
+        disponible: true
+
+    ProductoPut:
+      type: object
+      properties:
+        sku:
+          type: string
+        stock:
+          type: integer
+        precio:
+          type: integer
+        disponible:
+          type: boolean
+          description: >
+            Flag manual del vendedor para pausar o publicar el producto.
+            Si no se especifica, se considera `true`.
+      required:
+        - sku
+        - stock
+        - precio
+      example:
+        sku: "123"
+        stock: 234
+        precio: 12000
+        disponible: true
+
+    ProductoPatch:
+      type: object
+      minProperties: 1
+      properties:
+        stock:
+          type: integer
+        precio:
+          type: integer
+        disponible:
+          type: boolean
+          description: > 
+            Flag manual que permite al vendedor pausar o publicar un producto.
+            Este campo no depende del stock.
+            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones:
+            - disponible = true
+            - stock > 0
+      example:
+        stock: 123
+        precio: 900000
+        disponible: false
+  
+    ReservaRequest:
+      type: object
+      properties:
+        id_orden:
+          type: string
+        sku:
+          type: string
+        cantidad:
+          type: integer
+          minimum: 1
+      required:
+        - id_orden
+        - sku
+        - cantidad
+      example:
+        id_orden: "123"
+        sku: "456"
+        cantidad: 2
+        
+    ReservaResponse:
+      type: object
+      properties:
+        id_orden:
+          type: string
+        sku:
+          type: string
+        tienda_id:
+          type: string
+        stock_restante:
+          type: integer
+        cantidad_reservada:
+          type: integer
+      required:
+        - id_orden
+        - sku
+        - tienda_id
+        - stock_restante
+        - cantidad_reservada
+      example:
+        id_orden: "123"
+        sku: "456"
+        tienda_id: "5678"
+        stock_restante: 10
+        cantidad_reservada: 2
+    
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+      example:
+        code: VALIDACION_STOCK
+        message: El stock debe ser un número entero mayor o igual a cero
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  parameters:
+    skuParam:
+      name: sku
+      in: path
+      required: true
+      description: Identificador único del producto
+      schema:
+        type: string
+    
+    idOrden:
+      name: id_orden
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Identificador de la orden asociada a la reserva
