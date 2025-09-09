@@ -311,7 +311,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReservaPatchExitoso'
+                $ref: '#/components/schemas/ReservaResponse'
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -331,8 +331,10 @@ paths:
       summary: Cancelar reserva de stock (pago fallido o timeout)
       description: >
         Cancela una reserva de stock asociada a una orden (`id_orden`). <br><br>
-        Esta operación puede ser invocada cuando el pago falla o cuando la reserva expira. <br>
-        Al cancelarse, el stock reservado se reintegra al inventario del producto. <br><br>
+        Esta operación puede ser invocada cuando el pago falla o cuando la reserva expira.
+        <br>
+        Al cancelarse, el stock reservado se reintegra al inventario del producto.
+        <br><br>
         Si la reserva no existe o ya fue procesada, se retorna un error `404 RESERVA_NO_ENCONTRADA`.
       security: []
       parameters:
@@ -343,7 +345,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ReservaPatchExitoso'
+                $ref: '#/components/schemas/ReservaResponse'
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -529,12 +531,9 @@ components:
           precio: 100
           disponible: false
 
-
     ProductoPut:
       type: object
       properties:
-        sku:
-          type: string
         stock:
           type: integer
         precio:
@@ -545,11 +544,9 @@ components:
             Flag manual del vendedor para pausar o publicar el producto.  <br>
             Si no se especifica, se considera `true`.
       required:
-        - sku
         - stock
         - precio
       example:
-        sku: "123"
         stock: 234
         precio: 12000
         disponible: true
@@ -580,47 +577,32 @@ components:
       properties:
         id_orden:
           type: string
-        sku:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              sku:
+                type: string
+              cantidad_reservada:
+                type: integer
+        expira_en:
           type: string
-        cantidad:
-          type: integer
-          minimum: 1
+          format: date-time
       required:
         - id_orden
-        - sku
-        - cantidad
+        - items
+        - expira_en
       example:
-        id_orden: "123"
-        sku: "456"
-        cantidad: 2
+        id_orden: "123QWE"
+        items:
+          - sku: "ABC123"
+            cantidad_reservada: 2
+          - sku: "XYZ456"
+            cantidad_reservada: 1
+        expira_en: "2025-09-10T12:00:00Z"
         
     ReservaResponse:
-      type: object
-      properties:
-        id_orden:
-          type: string
-        sku:
-          type: string
-        tienda_id:
-          type: string
-        stock_restante:
-          type: integer
-        cantidad_reservada:
-          type: integer
-      required:
-        - id_orden
-        - sku
-        - tienda_id
-        - stock_restante
-        - cantidad_reservada
-      example:
-        id_orden: "123"
-        sku: "456"
-        tienda_id: "5678"
-        stock_restante: 10
-        cantidad_reservada: 2
-    
-    ReservaPatchExitoso:
       type: object
       properties:
         success:
