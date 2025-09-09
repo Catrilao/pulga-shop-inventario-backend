@@ -3,7 +3,10 @@ info:
   title: API Inventario
   version: 1.0.0
   description: >
-    Microservicio de vendedores e inventario
+    Microservicio encargado de la gestión de productos, tiendas y reservas de stock para procesos de compra. <br>
+    Incluye funcionalidades de creación, actualización, eliminación y consulta de productos, así como la reserva de stock durante el checkout y el manejo de tiendas asociadas a vendedores. <br><br>
+    Para autenticación, se usa un token JWT en el header:
+    `Authorization: Bearer {token}`
 tags:
   - name: Productos
     description: Gestión de productos y stock
@@ -11,6 +14,8 @@ tags:
     description: Gestión de reservas de stock durante el checkout
   - name: Tiendas
     description: Gestión de tiendas
+security:
+  - bearerAuth: []
 
 paths:
   /productos:
@@ -18,6 +23,15 @@ paths:
       tags:
         - Productos
       summary: Añadir producto y setear stock
+      description: >
+        Crea un nuevo producto en el sistema de inventario. <br><br>
+        El producto debe ser único por `sku`; si ya existe, se retorna un error `409 PRODUCTO_DUPLICADO`.
+        <br>
+        El campo `disponible` indica si el producto está visible para el cliente final, pero su disponibilidad también depende de que el `stock` sea mayor a cero.
+        <br><br>
+        Requiere autenticación con JWT.
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -38,8 +52,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: VALIDACION_STOCK
-                message: El stock debe ser un número entero mayor o igual a cero
+                code: INVALID_STOCK
+                message: Stock debe ser un número entero mayor o igual a cero
         '401':
           description: Acceso denegado
           content: 
@@ -58,14 +72,59 @@ paths:
               example:
                 code: PRODUCTO_DUPLICADO
                 message: El producto con SKU 123 ya está registrado
-      security:
-        - bearerAuth: []
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+        
+    get:
+      tags:
+        - Productos
+      summary: Entrega lista de todos los productos
+      description: >
+        Devuelve un arreglo con todos los productos registrados en el inventario.
+        <br><br>
+        Si no hay productos disponibles, retorna un error `404 INVENTARIO_VACIO`.
+        <br><br>
+        Requiere autenticación con JWT.
+      responses:
+        '200':
+          description: Lista de productos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArrayProductosGet'
+        '401':
+          description: Acceso denegado
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: Sesión no iniciada
+        '404':
+          description: No encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: INVENTARIO_VACIO
+                message: No existen productos registrados
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
 
   /productos/{sku}:
     get:
       tags:
         - Productos
       summary: Consultar datos de un producto
+      description: > 
+        Obtiene los detalles de un producto específico a partir de su `sku`.
+        <br><br>
+        Si el producto no existe, se retorna un error
+        `404 PRODUCTO_NO_ENCONTRADO`.
+      security: []
       parameters:
         - $ref: '#/components/parameters/skuParam'
       responses:
@@ -84,11 +143,18 @@ paths:
               example:
                 code: PRODUCTO_NO_ENCONTRADO
                 message: El producto con SKU 123 no fue encontrado
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
 
     patch:
       tags:
         - Productos
       summary: Actualizar datos del producto
+      description: >
+        Permite actualizar uno o más atributos de un producto específico, identificado por su `sku`. <br><br>
+        Solo se actualizan los campos enviados. Si el cuerpo está vacío, se retorna un error `400 CUERPO_VACIO`. <br>
+        La disponibilidad de un producto depende tanto del campo `disponible` como del `stock > 0`. <br><br>
+        Requiere autenticación JWT y permisos del vendedor correspondiente..
       parameters:
         - $ref: '#/components/parameters/skuParam'
       requestBody:
@@ -127,14 +193,72 @@ paths:
               example:
                 code: PRODUCTO_NO_ENCONTRADO
                 message: El producto con SKU 123 no fue encontrado
-      security:
-        - bearerAuth: []
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    delete:
+      tags:
+        - Productos
+      summary: Eliminar un producto.
+      description: > 
+        Elimina un producto del inventario según su `sku`.
+        <br><br> 
+        Antes de proceder, el sistema valida que el producto no esté asociado a ninguna orden activa.
+        <br>
+        Si hay órdenes en curso, se devuelve un error `409 PRODUCTO_EN_ORDEN_ACTIVA`.
+        <br><br> 
+        Requiere autenticación JWT y permisos del vendedor correspondiente..
+      parameters:
+        - $ref: '#/components/parameters/skuParam'
+      responses:
+        '204':
+          description: Producto eliminado con exito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductoGet'
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: No tienes permisos para eliminar este producto
+        '404':
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: PRODUCTO_NO_ENCONTRADO
+                message: El producto con SKU 123 no fue encontrado
+        '409':
+          description: Conflicto. El producto está en una orden activa y no puede ser eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: PRODUCTO_EN_ORDEN_ACTIVA
+                message: El producto con SKU 123 está en una orden
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+            
 
   /reservas:
     post:
       tags:
         - Reservas
       summary: Reservar stock para una orden (inicio de checkout)
+      description: >
+        Realiza una reserva temporal de stock para una orden, vinculada al `sku` del producto. <br><br>
+        Esta operación se ejecuta durante el inicio del proceso de compra (checkout). Si no hay stock suficiente,
+        se retorna un error `409 STOCK_INSUFICIENTE`. <br><br>
+        Las reservas no confirmadas se consideran expiradas tras cierto tiempo, y pueden ser canceladas automáticamente.
+      security: []
       requestBody:
         required: true
         content:
@@ -166,17 +290,28 @@ paths:
               example:
                 code: STOCK_INSUFICIENTE
                 message: No hay stock suficiente de este producto
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
 
   /reservas/{id_orden}/confirmar:
     patch:
       tags:
         - Reservas
       summary: Confirmar reserva de stock tras pago exitoso
+      description: >
+        Confirma una reserva previamente realizada para una orden (`id_orden`). <br><br>
+        Al confirmarse, el stock reservado se descuenta de forma definitiva. <br>
+        Si la reserva no existe o ya expiró, se retorna un error `404 RESERVA_NO_ENCONTRADA`.
+      security: []
       parameters:
         - $ref: '#/components/parameters/idOrden'
       responses:
-        '200':
+        '201':
           description: Reserva confirmada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaPatchExitoso'
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -186,17 +321,29 @@ paths:
               example:
                 code: RESERVA_NO_ENCONTRADA
                 message: La reserva con ID 123 no fue encontrada
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
 
   /reservas/{id_orden}/cancelar:
     patch:
       tags:
         - Reservas
       summary: Cancelar reserva de stock (pago fallido o timeout)
+      description: >
+        Cancela una reserva de stock asociada a una orden (`id_orden`). <br><br>
+        Esta operación puede ser invocada cuando el pago falla o cuando la reserva expira. <br>
+        Al cancelarse, el stock reservado se reintegra al inventario del producto. <br><br>
+        Si la reserva no existe o ya fue procesada, se retorna un error `404 RESERVA_NO_ENCONTRADA`.
+      security: []
       parameters:
       - $ref: '#/components/parameters/idOrden'
       responses:
-        '200':
+        '201':
           description: Reserva cancelada, stock devuelto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReservaPatchExitoso'
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -206,6 +353,130 @@ paths:
               example:
                 code: RESERVA_NO_ENCONTRADA
                 message: La reserva con ID 123 no fue encontrada
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /tiendas:
+    post:
+      tags:
+        - Tiendas
+      summary: Crear una tienda con un vendedor asociado
+      description: >
+        Crea una nueva tienda y la asocia al vendedor autenticado. <br><br>
+        Cada tienda contiene información como nombre, dirección y teléfono. <br>
+        Si no se cuenta con los permisos adecuados, se retorna un error `401 NO_AUTORIZADO`. <br><br>
+        Requiere autenticación JWT.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TiendaPost'
+      responses:
+        '201':
+          description: Tienda creada con exito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendaGet'
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: No tienes permisos para crear una tienda
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+  /tiendas/{id_tienda}:
+    get:
+      tags:
+        - Tiendas
+      summary: Obtener datos de una tienda
+      description: >
+        Retorna los detalles de una tienda específica a partir de su `id_tienda`. <br><br>
+        Si no se encuentra la tienda, se retorna un error `404 TIENDA_NO_ENCONTRADA`.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/id_tiendaParam'
+      responses:
+        '200':
+          description: Tienda encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendaGet'
+        '404':
+          description: Tienda no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: TIENDA_NO_ENCONTRADA
+                message: La tienda con ID 123 no fue encontrada
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
+
+    patch:
+      tags:
+        - Tiendas
+      summary: Actualizar datos de una tienda
+      description: >
+        Permite modificar los datos de una tienda específica (`id_tienda`).
+        <br><br>
+        Se puede actualizar el nombre, la dirección y el teléfono. Al menos un campo debe ser enviado.
+        <br>
+        Si el cuerpo de la petición está vacío, se retorna un error `400 CUERPO_VACIO`.
+        <br><br>
+        Requiere autenticación JWT y permisos del vendedor dueño de la tienda.
+      parameters:
+        - $ref: '#/components/parameters/id_tiendaParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TiendaPatch'
+      responses:
+        '200':
+          description: Tienda actualizada con exito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TiendaGet'
+        '400':
+          description: Petición inválida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: CUERPO_VACIO
+                message: Debe haber al menos un campo
+        '401':
+          description: Acceso denegado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: NO_AUTORIZADO
+                message: No tienes permisos para editar esta tienda
+        '404':
+          description: Tienda no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: TIENDA_NO_ENCONTRADA
+                message: Tienda con ID 123 no fue encontrada
+        '500':
+          $ref: '#/components/responses/ErrorServidor'
 
 components:
   schemas:
@@ -214,6 +485,7 @@ components:
       properties:
         sku:
           type: string
+          format: uuid
         tienda_id:
           type: string
         stock:
@@ -224,9 +496,9 @@ components:
           type: boolean
           description: > 
             Flag manual que permite al vendedor pausar o publicar un producto.
-            Este campo no depende del stock.
-            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones:
-            - disponible = true
+            Este campo no depende del stock. <br>
+            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones: <br>
+            - disponible = true <br>
             - stock > 0
       required:
         - sku
@@ -240,6 +512,23 @@ components:
         stock: 234
         precio: 12000
         disponible: true
+        
+    ArrayProductosGet:
+      type: array
+      items:
+        $ref: '#/components/schemas/ProductoGet'
+      example:
+        - sku: "123"
+          tienda_id: "5678"
+          stock: 234
+          precio: 12000
+          disponible: true
+        - sku: "456"
+          tienda_id: "5678"
+          stock: 2
+          precio: 100
+          disponible: false
+
 
     ProductoPut:
       type: object
@@ -253,7 +542,7 @@ components:
         disponible:
           type: boolean
           description: >
-            Flag manual del vendedor para pausar o publicar el producto.
+            Flag manual del vendedor para pausar o publicar el producto.  <br>
             Si no se especifica, se considera `true`.
       required:
         - sku
@@ -276,10 +565,10 @@ components:
         disponible:
           type: boolean
           description: > 
-            Flag manual que permite al vendedor pausar o publicar un producto.
-            Este campo no depende del stock.
-            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones:
-            - disponible = true
+            Flag manual que permite al vendedor pausar o publicar un producto. <br>
+            Este campo no depende del stock. <br>
+            Para que un producto esté disponible para compra, deben cumplirse ambas condiciones: <br>
+            - disponible = true <br>
             - stock > 0
       example:
         stock: 123
@@ -331,6 +620,84 @@ components:
         stock_restante: 10
         cantidad_reservada: 2
     
+    ReservaPatchExitoso:
+      type: object
+      properties:
+        success:
+          type: boolean
+        id_orden:
+          type: string
+          format: uuid
+      example:
+        success: true
+        id_orden: '123'
+      
+      
+
+    TiendaPost:
+      type: object
+      properties:
+        nombre:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: integer
+      required:
+        - nombre
+        - direccion
+        - telefono
+      example:
+        nombre: "CompumundoHipermegaRed"
+        direccion: "Avenida Siempre Viva 742"
+        telefono: 912345678
+
+    TiendaGet:
+      type: object
+      properties:
+        id_tienda:
+          type: string
+        id_vendedor:
+          type: string
+        nombre:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+        fecha_creacion:
+          type: string
+          format: date
+          description: "Fecha de creación de la tienda en formato YYYY-MM-DD."
+      required:
+        - id_tienda
+        - id_vendedor
+        - nombre
+        - direccion
+        - telefono
+        - fecha_creacion
+      example:
+        id_tienda: "ac123"
+        id_vendedor: "456"
+        nombre: "CompumundoHipermegaRed"
+        direccion: "Avenida Siempre Viva 742"
+        telefono: "912345678"
+        fecha_creacion: "2024-12-31"
+        
+    TiendaPatch:
+      type: object
+      properties:
+        nombre:
+          type: string
+        direccion:
+          type: string
+        telefono:
+          type: string
+      minProperties: 1
+      example:
+        nombre: "CompumundoHipermegaRed"
+        direccion: "Avenida Siempre Viva 742"
+        telefono: "912345678"
 
     Error:
       type: object
@@ -345,6 +712,17 @@ components:
       example:
         code: VALIDACION_STOCK
         message: El stock debe ser un número entero mayor o igual a cero
+
+  responses:
+    ErrorServidor:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: ERROR_INTERNO
+            message: Ocurrió un error en el servidor
 
   securitySchemes:
     bearerAuth:
@@ -368,3 +746,11 @@ components:
       schema:
         type: string
       description: Identificador de la orden asociada a la reserva
+      
+    id_tiendaParam:
+      name: id_tienda
+      in: path
+      required: true
+      description: Identificador único de la tienda
+      schema:
+        type: string
