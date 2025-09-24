@@ -36,7 +36,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductoPut'
+              $ref: '#/components/schemas/ProductoPost'
       responses:
         '201':
           description: Producto añadido con éxito
@@ -203,10 +203,6 @@ paths:
       responses:
         '204':
           description: Producto eliminado con exito
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ProductoGet'
         '401':
           description: Acceso denegado
           content:
@@ -256,7 +252,7 @@ paths:
             schema:
               $ref: '#/components/schemas/ReservaRequest'
       responses:
-        '201':
+        '200':
           description: Reserva creada con éxito
           content:
             application/json:
@@ -296,7 +292,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/idOrden'
       responses:
-        '201':
+        '200':
           description: Reserva confirmada
           content:
             application/json:
@@ -477,7 +473,6 @@ components:
       properties:
         sku:
           type: string
-          format: uuid
         tienda_id:
           type: string
         stock:
@@ -521,7 +516,7 @@ components:
           precio: 100
           disponible: false
 
-    ProductoPut:
+    ProductoPost:
       type: object
       properties:
         stock:
@@ -599,7 +594,6 @@ components:
           type: boolean
         id_orden:
           type: string
-          format: uuid
       example:
         success: true
         id_orden: '123'
@@ -614,7 +608,7 @@ components:
         direccion:
           type: string
         telefono:
-          type: integer
+          type: string
       required:
         - nombre
         - direccion
