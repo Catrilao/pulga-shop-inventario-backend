@@ -19,14 +19,13 @@ security:
 
 paths:
   /productos:
-    put:
+    post:
       tags:
         - Productos
       summary: Añadir producto y setear stock
       description: >
-        Crea un nuevo producto en el sistema de inventario. <br><br>
-        El producto debe ser único por `sku`; si ya existe, se retorna un error `409 PRODUCTO_DUPLICADO`.
-        <br>
+        Crea un nuevo producto en el sistema de inventario con un `sku` único.
+        <br><br>
         El campo `disponible` indica si el producto está visible para el cliente final, pero su disponibilidad también depende de que el `stock` sea mayor a cero.
         <br><br>
         Requiere autenticación con JWT.
@@ -63,15 +62,6 @@ paths:
               example:
                 code: NO_AUTORIZADO
                 message: Sesión no iniciada
-        '409':
-          description: Conflicto. Producto ya existe
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                code: PRODUCTO_DUPLICADO
-                message: El producto con SKU 123 ya está registrado
         '500':
           $ref: '#/components/responses/ErrorServidor'
         
