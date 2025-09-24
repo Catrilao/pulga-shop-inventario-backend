@@ -1,3 +1,165 @@
+# API Inventario - Pulga Shop
+
+## 📖 Documentación de la API
+
+La especificación completa de la API se encuentra documentada en OpenAPI 3.0 y está disponible en múltiples formatos:
+
+- **Especificación OpenAPI:** [`docs/docs.yaml`](./docs/docs.yaml)
+- **Documentación interactiva:** [API Inventario (HTML)](https://catrilao.github.io/pulga-shop-inventario-backend/#/)
+- **Swagger UI local:** [http://localhost:3000/docs](http://localhost:3000/docs) *(cuando el servidor esté ejecutándose)*
+
+## 🚀 Endpoints Principales
+
+### 📦 Productos
+- `POST /productos` → Añadir producto y setear stock inicial
+- `GET /productos` → Listar todos los productos con filtros opcionales
+- `GET /productos/{sku}` → Consultar producto específico por SKU
+- `PATCH /productos/{sku}` → Actualizar información del producto
+- `DELETE /productos/{sku}` → Eliminar producto del inventario
+
+### 📋 Reservas
+- `POST /reservas` → Reservar stock (inicio del proceso de checkout)
+- `PATCH /reservas/{id_orden}/confirmar` → Confirmar reserva tras pago exitoso
+- `PATCH /reservas/{id_orden}/cancelar` → Cancelar reserva y liberar stock
+
+### 🏪 Tiendas
+- `POST /tiendas` → Crear nueva tienda con vendedor asociado
+- `GET /tiendas/{id_tienda}` → Obtener información completa de una tienda
+- `PATCH /tiendas/{id_tienda}` → Actualizar datos de la tienda
+
+## 📊 Diagramas y Arquitectura
+
+### Diagramas de Flujo
+
+#### 📦 Flujo de Productos
+Gestión del inventario y productos
+
+![Diagrama de Productos](./docs/diagrams/diagramas_productos.png)
+
+#### 📋 Flujo de Reservas
+Proceso de reserva y confirmación de stock
+
+![Diagrama de Reservas](./docs/diagrams/diagramas_reservas.png)
+
+#### 🏪 Flujo de Tiendas
+Gestión de tiendas y vendedores asociados
+
+![Diagrama de Tiendas](./docs/diagrams/diagramas_tienda.png)
+
+### Modelo de Base de Datos
+
+#### 🗄️ Modelo Relacional
+Estructura de la base de datos MySQL
+
+![Modelo Relacional](./docs/diagrams/bd/modelo_relacional.png)
+
+## 🗄️ Base de Datos
+
+### Arquitectura Híbrida
+El sistema utiliza una arquitectura de base de datos híbrida:
+- **MySQL**: Almacenamiento persistente de tiendas y productos
+- **Redis**: Gestión temporal de reservas con expiración automática
+
+### Estructura de Datos
+
+#### Base de Datos Relacional (MySQL)
+
+**Tabla: `tienda`**
+| Atributo | Tipo | Nulo | Clave | Descripción |
+|----------|------|------|-------|-------------|
+| `id_tienda` | INT AUTO_INCREMENT | NO | PK | Identificador único de la tienda |
+| `id_vendedor` | BIGINT | NO | - | Referencia al vendedor dueño (módulo externo) |
+| `nombre` | VARCHAR(100) | NO | - | Nombre de la tienda |
+| `direccion` | VARCHAR(200) | NO | - | Dirección física de la tienda |
+| `telefono` | VARCHAR(20) | SÍ | - | Teléfono de contacto |
+| `fecha_creacion` | DATE | NO | - | Fecha de registro en el sistema |
+
+**Tabla: `producto`**
+| Atributo | Tipo | Nulo | Clave | Descripción |
+|----------|------|------|-------|-------------|
+| `sku` | VARCHAR | NO | PK | Identificador único del producto |
+| `id_tienda` | INT | NO | FK | Tienda propietaria del producto |
+| `cantidad` | INT | NO | - | Stock disponible en inventario |
+| `precio` | INT | NO | - | Precio de venta del producto |
+
+#### Base de Datos en Memoria (Redis)
+
+**Estructura: `reserva`**
+| Atributo | Tipo | Tipo Redis | Descripción |
+|----------|------|------------|-------------|
+| `id_orden` | STRING | KEY | Identificador único de la reserva |
+| `expira_en` | DATETIME | VALUE | Tiempo de expiración de la reserva |
+
+**Estructura: `items`**
+| Atributo | Tipo | Tipo Redis | Descripción |
+|----------|------|------------|-------------|
+| `id_orden` | STRING | VALUE | Identificador de la reserva |
+| `sku` | STRING | VALUE | Producto reservado |
+| `cantidad_reservada` | INTEGER | VALUE | Cantidad apartada para la orden |
+
+## 🔧 Instalación y Configuración
+
+### Prerrequisitos
+- Node.js (v16 o superior)
+- MySQL Server
+- Redis Server
+
+### Variables de Entorno
+Crea un archivo `.env` basado en `.env.example`:
+
+```bash
+# Base de datos MySQL
+DB_HOST=localhost
+DB_PORT=3306
+DB_NAME=pulga_shop_inventario
+DB_USER=your_username
+DB_PASSWORD=your_password
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_redis_password
+
+# Servidor
+PORT=3000
+NODE_ENV=development
+```
+
+### Ejecución
+```bash
+# Instalar dependencias
+npm install
+
+# Ejecutar migraciones de base de datos
+npm run migrate
+
+# Modo desarrollo
+npm run dev
+
+# Modo producción
+npm start
+```
+
+## 🧪 Testing
+
+```bash
+# Ejecutar tests
+npm test
+
+# Tests con coverage
+npm run test:coverage
+
+# Tests en modo watch
+npm run test:watch
+```
+
+---
+
+📚 **Para más detalles:** Consulta la [documentación completa de la API](https://catrilao.github.io/pulga-shop-inventario-backend/#/) o revisa la especificación OpenAPI en [`docs/docs.yaml`](./docs/docs.yaml).
+
+---
+
+
 # Backend NestJS para GPI Template - Universidad de Valparaíso
 
 Este proyecto es un backend desarrollado con NestJS y MongoDB para el template GPI de la Universidad de Valparaíso. El backend proporciona una API RESTful que se integra con el frontend React, ofreciendo funcionalidades de autenticación y gestión de usuarios.
