@@ -394,10 +394,14 @@ Temporary Items
 
 =======
 # Local
-#.env #Debes agregar tu archivo .env con tus variables de entorno en tu proyecto
+*.env
 dist
 .webpack
 .serverless/**/*.zip
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
+
+# Prisma
+*.db
+generated/
