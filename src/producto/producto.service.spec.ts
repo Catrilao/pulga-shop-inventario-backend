@@ -5,6 +5,7 @@ import { CreateProductoDto } from './dto/create-producto.dto';
 
 describe('ProductoService', () => {
   let service: ProductoService;
+  let prisma: PrismaService;
 
   const mockPrisma = {
     tienda: {
