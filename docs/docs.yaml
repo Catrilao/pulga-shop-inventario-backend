@@ -51,8 +51,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: INVALID_STOCK
-                message: Stock debe ser un número entero mayor o igual a cero
+                message: El stock inicial debe ser mayor a 0
+                error: INVALID_STOCK
+                statusCode: 400 
         '401':
           description: Acceso denegado
           content: 
@@ -60,8 +61,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: Sesión no iniciada
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '500':
           $ref: '#/components/responses/ErrorServidor'
         
@@ -89,8 +91,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: Sesión no iniciada
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '404':
           description: No encontrado
           content:
@@ -98,8 +101,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: INVENTARIO_VACIO
                 message: No existen productos registrados
+                error: INVENTARIO_VACIO
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -131,8 +135,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: PRODUCTO_NO_ENCONTRADO
                 message: El producto con SKU 123 no fue encontrado
+                error: PRODUCTO_NO_ENCONTRADO
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -163,8 +168,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: DATOS_ERRONEOS
-                message: El stock debe ser mayor o igual a cero
+                message: El stock inicial debe ser mayor a 0
+                error: DATOS_ERRONEOS
+                statusCode: 400 
         '401':
           description: Acceso denegado
           content:
@@ -172,8 +178,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: No tienes permisos para editar este producto
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '404':
           description: Producto no encontrado
           content:
@@ -181,8 +188,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: PRODUCTO_NO_ENCONTRADO
-                message: El producto con SKU 123 no fue encontrado
+                message: El producto con SKU 0033caaf-3727-47b5-9509-0a7e687e58e0 no fue encontrado
+                error: PRODUCTO_NO_ENCONTRADO
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -210,8 +218,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: No tienes permisos para eliminar este producto
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '404':
           description: Producto no encontrado
           content:
@@ -219,8 +228,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: PRODUCTO_NO_ENCONTRADO
-                message: El producto con SKU 123 no fue encontrado
+                message: El producto con SKU 0033caaf-3727-47b5-9509-0a7e687e58e0 no fue encontrado
+                error: PRODUCTO_NO_ENCONTRADO
+                statusCode: 404 
         '409':
           description: Conflicto. El producto está en una orden activa y no puede ser eliminado
           content:
@@ -228,8 +238,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: PRODUCTO_EN_ORDEN_ACTIVA
-                message: El producto con SKU 123 está en una orden
+                message: El producto con SKU 0033caaf-3727-47b5-9509-0a7e687e58e0 está en una orden
+                error: PRODUCTO_EN_ORDEN_ACTIVA
+                statusCode: 409 
         '500':
           $ref: '#/components/responses/ErrorServidor'
             
@@ -265,8 +276,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: DATOS_ERRONEOS
                 message: La cantidad debe ser mayor a cero
+                error: DATOS_ERRONEOS
+                statusCode: 400 
         '409':
           description: Stock insuficiente
           content:
@@ -274,8 +286,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: STOCK_INSUFICIENTE
                 message: No hay stock suficiente de este producto
+                error: STOCK_INSUFICIENTE
+                statusCode: 409 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -305,8 +318,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: RESERVA_NO_ENCONTRADA
                 message: La reserva con ID 123 no fue encontrada
+                error: RESERVA_NO_ENCONTRADA
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -339,8 +353,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: RESERVA_NO_ENCONTRADA
                 message: La reserva con ID 123 no fue encontrada
+                error: RESERVA_NO_ENCONTRADA
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -374,8 +389,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: No tienes permisos para crear una tienda
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -404,8 +420,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: TIENDA_NO_ENCONTRADA
                 message: La tienda con ID 123 no fue encontrada
+                error: TIENDA_NO_ENCONTRADA
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -443,8 +460,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: CUERPO_VACIO
                 message: Debe haber al menos un campo
+                error: CUERPO_VACIO
+                statusCode: 400 
         '401':
           description: Acceso denegado
           content:
@@ -452,8 +470,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: NO_AUTORIZADO
                 message: No tienes permisos para editar esta tienda
+                error: NO_AUTORIZADO
+                statusCode: 401 
         '404':
           description: Tienda no encontrada
           content:
@@ -461,8 +480,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                code: TIENDA_NO_ENCONTRADA
                 message: Tienda con ID 123 no fue encontrada
+                error: TIENDA_NO_ENCONTRADA
+                statusCode: 404 
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -473,8 +493,8 @@ components:
       properties:
         sku:
           type: string
-        tienda_id:
-          type: string
+        id_tienda:
+          type: integer
         stock:
           type: integer
         precio:
@@ -489,13 +509,13 @@ components:
             - stock > 0
       required:
         - sku
-        - tienda_id
+        - id_tienda
         - stock
         - precio
         - disponible
       example:
-        sku: "123"
-        tienda_id: "5678"
+        sku: "0033caaf-3727-47b5-9509-0a7e687e58e0"
+        id_tienda: 3
         stock: 234
         precio: 12000
         disponible: true
@@ -505,13 +525,13 @@ components:
       items:
         $ref: '#/components/schemas/ProductoGet'
       example:
-        - sku: "123"
-          tienda_id: "5678"
+        - sku: "0033caaf-3727-47b5-9509-0a7e687e58e0"
+          id_tienda: 3
           stock: 234
           precio: 12000
           disponible: true
-        - sku: "456"
-          tienda_id: "5678"
+        - sku: "0033caaf-3727-47b5-9509-0a7e687e58e0"
+          id_tienda: 4
           stock: 2
           precio: 100
           disponible: false
@@ -519,6 +539,8 @@ components:
     ProductoPost:
       type: object
       properties:
+        id_tienda:
+          type: integer
         stock:
           type: integer
         precio:
@@ -529,9 +551,11 @@ components:
             Flag manual del vendedor para pausar o publicar el producto.  <br>
             Si no se especifica, se considera `true`.
       required:
+        - id_tienda
         - stock
         - precio
       example:
+        id_tienda: 2
         stock: 234
         precio: 12000
         disponible: true
@@ -581,9 +605,9 @@ components:
       example:
         id_orden: "123QWE"
         items:
-          - sku: "ABC123"
+          - sku: "0033caaf-3727-47b5-9509-0a7e687e58e0"
             cantidad_reservada: 2
-          - sku: "XYZ456"
+          - sku: "0033caaf-3727-47b5-9509-0a7e687e58e0"
             cantidad_reservada: 1
         expira_en: "2025-09-10T12:00:00Z"
         
@@ -605,27 +629,33 @@ components:
       properties:
         nombre:
           type: string
+        descripcion:
+          type: string
         direccion:
           type: string
         telefono:
           type: string
       required:
         - nombre
+        - descripcion
         - direccion
         - telefono
       example:
         nombre: "CompumundoHipermegaRed"
+        descripcion: "Tienda de tecnología"
         direccion: "Avenida Siempre Viva 742"
-        telefono: 912345678
+        telefono: "912345678"
 
     TiendaGet:
       type: object
       properties:
         id_tienda:
-          type: string
+          type: integer
         id_vendedor:
-          type: string
+          type: "integer"
         nombre:
+          type: string
+        descripcion:
           type: string
         direccion:
           type: string
@@ -643,9 +673,10 @@ components:
         - telefono
         - fecha_creacion
       example:
-        id_tienda: "ac123"
+        id_tienda: 3
         id_vendedor: "456"
         nombre: "CompumundoHipermegaRed"
+        descripcion: "Tienda de tecnología"
         direccion: "Avenida Siempre Viva 742"
         telefono: "912345678"
         fecha_creacion: "2024-12-31"
@@ -655,6 +686,8 @@ components:
       properties:
         nombre:
           type: string
+        descripcion:
+          type: string
         direccion:
           type: string
         telefono:
@@ -662,22 +695,27 @@ components:
       minProperties: 1
       example:
         nombre: "CompumundoHipermegaRed"
+        descripcion: "Tienda de tecnología"
         direccion: "Avenida Siempre Viva 742"
         telefono: "912345678"
 
     Error:
       type: object
       properties:
-        code:
-          type: string
         message:
           type: string
+        error:
+          type: string
+        statusCode:
+          type: integer
       required:
-        - code
         - message
+        - error
+        - statusCode
       example:
-        code: VALIDACION_STOCK
-        message: El stock debe ser un número entero mayor o igual a cero
+        message: direccion must be a string      
+        error: Bad request
+        statusCode: 400
 
   responses:
     ErrorServidor:
@@ -687,8 +725,9 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
           example:
-            code: ERROR_INTERNO
             message: Ocurrió un error en el servidor
+            error: ERROR_INTERNO
+            statusCode: 500
 
   securitySchemes:
     bearerAuth:
@@ -704,6 +743,7 @@ components:
       description: Identificador único del producto
       schema:
         type: string
+        format: uuid
     
     idOrden:
       name: id_orden
@@ -719,4 +759,4 @@ components:
       required: true
       description: Identificador único de la tienda
       schema:
-        type: string
+        type: integer
