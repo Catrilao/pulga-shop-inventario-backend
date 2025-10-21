@@ -7,11 +7,16 @@ export class TiendaService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTiendaDto: CreateTiendaDto, id_vendedor: number) {
-    return this.prisma.tienda.create({
+    const tienda = await this.prisma.tienda.create({
       data: {
         ...createTiendaDto,
         id_vendedor,
       },
     });
+
+    return {
+      ...tienda,
+      id_vendedor: tienda.id_vendedor.toString(),
+    }
   }
 }
