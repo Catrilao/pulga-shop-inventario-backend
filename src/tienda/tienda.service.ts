@@ -17,6 +17,6 @@ export class TiendaService {
     return {
       ...tienda,
       id_vendedor: tienda.id_vendedor.toString(),
-    }
+    };
   }
 }

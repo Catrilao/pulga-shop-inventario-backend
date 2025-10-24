@@ -37,7 +37,10 @@ export class JwtAuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
 
     if (!token) {
-      throw new UnauthorizedException('Token no encontrado');
+      throw new UnauthorizedException({
+        message: 'Token no encontrado',
+        error: 'NO_AUTORIZADO',
+      });
     }
 
     try {
@@ -53,7 +56,10 @@ export class JwtAuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      throw new UnauthorizedException(`Autenticación fallida: ${error}`);
+      throw new UnauthorizedException({
+        message: 'Sesión no iniciada',
+        error: 'NO_AUTORIZADO',
+      });
     }
   }
 }

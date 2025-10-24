@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { SwaggerModule } from '@nestjs/swagger';
+import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -22,6 +26,16 @@ async function bootstrap() {
 
   // Prefijo global para todas las rutas de la API
   app.setGlobalPrefix('api');
+
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  try {
+    const documentYaml = fs.readFileSync('docs/docs.yaml', 'utf8');
+    const document = yaml.load(documentYaml) as Record<string, unknown>;
+    SwaggerModule.setup('docs', app, document as any);
+  } catch (err) {
+    console.warn('No se pudo cargar la documentación Swagger: ', err);
+  }
 
   const port = process.env.PORT || 3000;
   await app.listen(port);

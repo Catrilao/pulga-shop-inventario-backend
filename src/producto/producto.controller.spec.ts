@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProductoController } from './producto.controller';
 import { ProductoService } from './producto.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -64,7 +64,7 @@ describe('ProductoController', () => {
     };
 
     it('should throw BadRequestException if service throws error', async () => {
-      mockProductoService.create.mockRejectedValue(new Error('Invalid data'));
+      mockProductoService.create.mockRejectedValue(new BadRequestException('Invalid data'));
       await expect(controller.create(dto)).rejects.toThrow(BadRequestException);
     });
 
@@ -87,9 +87,9 @@ describe('ProductoController', () => {
 
     it('should handle service throwing a custom error message', async () => {
       mockProductoService.create.mockRejectedValue(
-        new Error('La tienda no existe'),
+        new NotFoundException('La tienda no existe'),
       );
-      await expect(controller.create(dto)).rejects.toThrow(BadRequestException);
+      await expect(controller.create(dto)).rejects.toThrow(NotFoundException);
       await expect(controller.create(dto)).rejects.toThrow(
         'La tienda no existe',
       );
@@ -97,7 +97,7 @@ describe('ProductoController', () => {
 
     it('should propagate validation errors from service', async () => {
       mockProductoService.create.mockRejectedValue(
-        new Error('El stock inicial debe ser mayor a 0'),
+        new BadRequestException('El stock inicial debe ser mayor a 0'),
       );
       await expect(controller.create({ ...dto, stock: 0 })).rejects.toThrow(
         BadRequestException,

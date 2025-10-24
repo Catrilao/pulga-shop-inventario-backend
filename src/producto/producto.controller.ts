@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  HttpException,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -22,7 +23,14 @@ export class ProductoController {
     try {
       return await this.productoService.create(createProductoDto);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      const message =
+        error && typeof error === 'object' && 'message' in error
+        ? (error as any).message
+        : String(error ?? 'Bad Request');
+      throw new BadRequestException(message)
     }
   }
 }
