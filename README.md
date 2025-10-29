@@ -71,6 +71,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `id_vendedor` | BIGINT | NO | - | Referencia al vendedor dueño (módulo externo) |
 | `nombre` | VARCHAR(100) | NO | - | Nombre de la tienda |
 | `direccion` | VARCHAR(200) | NO | - | Dirección física de la tienda |
+| `descripcion` | text | NO | - |  Descripcion de la tienda |
 | `telefono` | VARCHAR(20) | SÍ | - | Teléfono de contacto |
 | `fecha_creacion` | DATE | NO | - | Fecha de registro en el sistema |
 
@@ -81,6 +82,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `id_tienda` | INT | NO | FK | Tienda propietaria del producto |
 | `cantidad` | INT | NO | - | Stock disponible en inventario |
 | `precio` | INT | NO | - | Precio de venta del producto |
+| `disponible` | BOOL | NO | - | Disponibilidad del producto |
 
 #### Base de Datos en Memoria (Redis)
 
