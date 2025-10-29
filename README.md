@@ -72,7 +72,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `nombre` | VARCHAR(100) | NO | - | Nombre de la tienda |
 | `direccion` | VARCHAR(200) | NO | - | Dirección física de la tienda |
 | `descripcion` | text | NO | - |  Descripcion de la tienda |
-| `telefono` | VARCHAR(20) | SÍ | - | Teléfono de contacto |
+| `telefono` | VARCHAR(20) | NO | - | Teléfono de contacto |
 | `fecha_creacion` | DATE | NO | - | Fecha de registro en el sistema |
 
 **Tabla: `producto`**
