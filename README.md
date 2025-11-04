@@ -49,7 +49,7 @@ Gestión de tiendas y vendedores asociados
 ### Modelo de Base de Datos
 
 #### 🗄️ Modelo Relacional
-Estructura de la base de datos MySQL
+Estructura de la base de datos Postgree
 
 ![Modelo Relacional](./docs/diagrams/bd/modelo_relacional.png)
 
@@ -57,12 +57,12 @@ Estructura de la base de datos MySQL
 
 ### Arquitectura Híbrida
 El sistema utiliza una arquitectura de base de datos híbrida:
-- **MySQL**: Almacenamiento persistente de tiendas y productos
+- **Postgree**: Almacenamiento persistente de tiendas y productos
 - **Redis**: Gestión temporal de reservas con expiración automática
 
 ### Estructura de Datos
 
-#### Base de Datos Relacional (MySQL)
+#### Base de Datos Relacional (Postgree)
 
 **Tabla: `tienda`**
 | Atributo | Tipo | Nulo | Clave | Descripción |
