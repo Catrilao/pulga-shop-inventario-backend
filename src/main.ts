@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import { getErrorCodeFromMetadata } from './common/decorators/error-code.decorator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,29 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true, // Elimina propiedades que no están en el DTO
       transform: true, // Transforma los datos recibidos al tipo del DTO
+      forbidNonWhitelisted: true,
+      stopAtFirstError: true,
+      exceptionFactory: (validationErrors) => {
+        const first = validationErrors.flatMap((error) =>
+          Object.values(error.constraints || {}).map((msg) => ({
+            property: error.property,
+            msg,
+            target: error.target,
+          })),
+        )[0];
+
+        const message = first?.msg ?? 'Datos inválidos';
+
+        let errorCode: string | undefined;
+        if (first?.target && first.property) {
+          errorCode = getErrorCodeFromMetadata(first.target, first.property);
+        }
+
+        return new BadRequestException({
+          message,
+          error: errorCode,
+        });
+      },
     }),
   );
 
