@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { UserPayload } from '../decorators/current-user.decorator';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC } from '../decorators/is-public.decorator';
+import { ERROR_CODES } from 'src/common/constants/error-codes';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -39,7 +40,7 @@ export class JwtAuthGuard implements CanActivate {
     if (!token) {
       throw new UnauthorizedException({
         message: 'Token no encontrado',
-        error: 'NO_AUTORIZADO',
+        error: ERROR_CODES.NO_AUTORIZADO,
       });
     }
 
@@ -58,7 +59,7 @@ export class JwtAuthGuard implements CanActivate {
     } catch (error) {
       throw new UnauthorizedException({
         message: 'Sesión no iniciada',
-        error: 'NO_AUTORIZADO',
+        error: ERROR_CODES.NO_AUTORIZADO,
       });
     }
   }
