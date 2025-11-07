@@ -9,6 +9,7 @@ describe('TiendaService', () => {
   const mockPrismaService = {
     tienda: {
       create: jest.fn(),
+      findFirst: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
@@ -29,6 +30,8 @@ describe('TiendaService', () => {
 
     service = module.get<TiendaService>(TiendaService);
     prismaService = module.get<PrismaService>(PrismaService);
+
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
