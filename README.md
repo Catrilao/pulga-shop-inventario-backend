@@ -49,7 +49,7 @@ Gestión de tiendas y vendedores asociados
 ### Modelo de Base de Datos
 
 #### 🗄️ Modelo Relacional
-Estructura de la base de datos MySQL
+Estructura de la base de datos Postgree
 
 ![Modelo Relacional](./docs/diagrams/bd/modelo_relacional.png)
 
@@ -57,12 +57,12 @@ Estructura de la base de datos MySQL
 
 ### Arquitectura Híbrida
 El sistema utiliza una arquitectura de base de datos híbrida:
-- **MySQL**: Almacenamiento persistente de tiendas y productos
+- **Postgree**: Almacenamiento persistente de tiendas y productos
 - **Redis**: Gestión temporal de reservas con expiración automática
 
 ### Estructura de Datos
 
-#### Base de Datos Relacional (MySQL)
+#### Base de Datos Relacional (Postgree)
 
 **Tabla: `tienda`**
 | Atributo | Tipo | Nulo | Clave | Descripción |
@@ -71,7 +71,8 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `id_vendedor` | BIGINT | NO | - | Referencia al vendedor dueño (módulo externo) |
 | `nombre` | VARCHAR(100) | NO | - | Nombre de la tienda |
 | `direccion` | VARCHAR(200) | NO | - | Dirección física de la tienda |
-| `telefono` | VARCHAR(20) | SÍ | - | Teléfono de contacto |
+| `descripcion` | text | NO | - |  Descripcion de la tienda |
+| `telefono` | VARCHAR(20) | NO | - | Teléfono de contacto |
 | `fecha_creacion` | DATE | NO | - | Fecha de registro en el sistema |
 
 **Tabla: `producto`**
@@ -81,6 +82,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `id_tienda` | INT | NO | FK | Tienda propietaria del producto |
 | `cantidad` | INT | NO | - | Stock disponible en inventario |
 | `precio` | INT | NO | - | Precio de venta del producto |
+| `disponible` | BOOL | NO | - | Disponibilidad del producto |
 
 #### Base de Datos en Memoria (Redis)
 
