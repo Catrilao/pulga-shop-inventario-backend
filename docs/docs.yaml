@@ -75,16 +75,43 @@ paths:
       description: >
         Devuelve un arreglo con todos los productos registrados en el inventario.
         <br><br>
+        Solo un vendedor de la tienda puede acceder a los productos del inventario.
+        <br><br>
         Si no hay productos disponibles, retorna un error `404 INVENTARIO_VACIO`.
         <br><br>
         Requiere autenticación con JWT.
+      parameters:
+        - name: sku
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar productos por su SKU
+        - name: disponible
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filtrar productos por disponibilidad (true o false)
+        - name: precio_min
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Filtrar productos con precio mayor o igual al valor especificado
+        - name: precio_max
+          in: query
+          required: false
+          schema:
+            type: number
+          description: Filtrar productos con precio menor o igual al valor especificado
       responses:
         '200':
           description: Lista de productos
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ArrayProductosGet'
+                $ref: '#/components/schemas/ProductosPaginados'
         '401':
           description: Acceso denegado
           content: 
@@ -681,6 +708,59 @@ components:
         descripcion: "Tienda de tecnología"
         direccion: "Avenida Siempre Viva 742"
         telefono: "912345678"
+
+    ProductosPaginados:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductoGet'
+        meta:
+          type: object
+          properties:
+            page:
+              type: integer
+              example: 1
+            take:
+              type: integer
+              example: 3
+            itemCount:
+              type: integer
+              example: 10
+            pageCount:
+              type: integer
+              example: 4
+            hasPreviousPage:
+              type: boolean
+              example: false
+            hasNextPage:
+              type: boolean
+              example: true
+      example:
+        data:
+          - sku: "d7ddca8a-4704-4ccb-9940-d2e8e5c53359"
+            id_tienda: 8
+            stock: 2
+            precio: 2
+            disponible: false
+          - sku: "eb2f7386-d301-4e4f-a2c0-f603b42b62b1"
+            id_tienda: 8
+            stock: 2
+            precio: 2
+            disponible: true
+          - sku: "3dba26ea-0341-4133-ab56-ee5550465223"
+            id_tienda: 8
+            stock: 2
+            precio: 2
+            disponible: true
+        meta:
+          page: 1
+          take: 3
+          itemCount: 10
+          pageCount: 4
+          hasPreviousPage: false
+          hasNextPage: true
 
     Error:
       type: object

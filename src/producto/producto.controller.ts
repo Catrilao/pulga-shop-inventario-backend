@@ -1,9 +1,24 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { ProductoService } from './producto.service';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CreateProductoDto } from './dto/create-producto.dto';
+import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
+import { PageDto } from 'src/common/dto/page.dto';
+import { GetProductoDto } from './dto/get-producto.dto';
+import { QueryProductoDto } from './dto/query-producto.dto';
+import { Public } from 'src/auth/decorators/is-public.decorator';
 
 @Controller('productos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -14,5 +29,22 @@ export class ProductoController {
   @Roles('vendedor')
   async create(@Body() createProductoDto: CreateProductoDto) {
     return await this.productoService.create(createProductoDto);
+  }
+
+  @Get(':sku')
+  @HttpCode(HttpStatus.OK)
+  @Public()
+  async findOne(@Param('sku') sku: string): Promise<GetProductoDto> {
+    return this.productoService.findOne(String(sku));
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @Roles('vendedor')
+  async findAll(
+    @CurrentUser('id') id_vendedor: number,
+    @Query() queryProductoDto: QueryProductoDto,
+  ): Promise<PageDto<GetProductoDto>> {
+    return this.productoService.findAll(id_vendedor, queryProductoDto);
   }
 }
