@@ -27,7 +27,7 @@ export class TiendaController {
 
   @Post()
   @Roles('vendedor')
-  create(
+  async create(
     @Body() createTiendaDto: CreateTiendaDto,
     @CurrentUser('id') id_vendedor: number,
   ) {
@@ -37,16 +37,16 @@ export class TiendaController {
   @Get(':id_tienda')
   @HttpCode(HttpStatus.OK)
   @Public()
-  findOne(@Param('id_tienda') id_tienda: number) {
+  async findOne(@Param('id_tienda') id_tienda: number) {
     return this.tiendaService.findOne(Number(id_tienda));
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @Roles('vendedor')
-  findAll(
+  async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
-    @CurrentUser('id') id_vendedor: number
+    @CurrentUser('id') id_vendedor: number,
   ): Promise<PageDto<GetTiendaDto>> {
     return this.tiendaService.findAll(pageOptionsDto, id_vendedor);
   }

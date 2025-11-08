@@ -58,7 +58,7 @@ export class TiendaService {
 
   async findAll(
     pageOptionsDto: PageOptionsDto,
-    id_vendedor: number
+    id_vendedor: number,
   ): Promise<PageDto<GetTiendaDto>> {
     const [tiendas, itemCount] = await Promise.all([
       this.prisma.tienda.findMany({
@@ -70,7 +70,9 @@ export class TiendaService {
       this.prisma.tienda.count(),
     ]);
 
-    const tiendasDto: GetTiendaDto[] = tiendas.map((tienda) => (serializeTienda(tienda)));
+    const tiendasDto: GetTiendaDto[] = tiendas.map((tienda) =>
+      serializeTienda(tienda),
+    );
 
     const pageMetaDto = new PageMetaDto({ pageOptionsDto, itemCount });
 

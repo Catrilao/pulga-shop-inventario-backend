@@ -1,4 +1,4 @@
-import { GetTiendaDto } from "../dto/get-tienda.dto";
+import { GetTiendaDto } from '../dto/get-tienda.dto';
 
 export function serializeTienda(tienda: {
   id_tienda: number;
