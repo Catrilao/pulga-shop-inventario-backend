@@ -23,10 +23,16 @@ model Tienda {
 }
 
 model Producto {
-    sku        String  @id
-    tienda     Tienda  @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
-    id_tienda  Int
-    stock      Int
-    precio     Int
-    disponible Boolean
+    id_producto    Int      @id @default(autoincrement())
+    tienda         Tienda   @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
+    id_tienda      Int
+    nombre         String
+    stock          Int
+    precio         Int
+    sku            String   @unique
+    condicion      String
+    fecha_creacion DateTime @default(now())
+    marca          String?
+    categoria      String?
+    descripcion    String?
 }
