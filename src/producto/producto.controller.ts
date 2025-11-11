@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -59,5 +60,15 @@ export class ProductoController {
     @Body() updateProductoDto: UpdateProductoDto,
   ): Promise<GetProductoDto> {
     return this.productoService.update(id_vendedor, sku, updateProductoDto);
+  }
+
+  @Delete(':sku')
+  @Roles('vendedor')
+  @HttpCode(HttpStatus.OK)
+  async delete(
+    @CurrentUser('id') id_vendedor: number,
+    @Param('sku') sku: string,
+  ): Promise<void> {
+    this.productoService.delete(id_vendedor, sku);
   }
 }

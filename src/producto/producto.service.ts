@@ -16,10 +16,14 @@ import { Prisma } from 'generated/prisma';
 import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
 import { generateSKU } from './utils/generate-sku';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class ProductoService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private redis: RedisService,
+  ) {}
 
   async create(createProductoDto: CreateProductoDto) {
     const { id_tienda, ...losDemas } = createProductoDto;
@@ -188,5 +192,43 @@ export class ProductoService {
     });
 
     return updatedProducto;
+  }
+
+  async delete(id_vendedor: number, sku: string): Promise<void> {
+    const producto = await this.prisma.producto.findUnique({
+      where: { sku },
+      include: { tienda: true },
+    });
+
+    if (!producto) {
+      throw new NotFoundException({
+        message: `El producto con SKU ${sku} no existe`,
+        error: ERROR_CODES.NO_ENCONTRADO,
+      });
+    }
+
+    if (producto.tienda.id_vendedor !== BigInt(id_vendedor)) {
+      throw new BadRequestException({
+        message: 'No tienes permisos para eliminar este producto',
+        error: ERROR_CODES.NO_AUTORIZADO,
+      });
+    }
+
+    const productoEnReserva = await this.redis.isProductoInReserva(sku);
+    if (productoEnReserva) {
+      throw new BadRequestException({
+        message: 'El producto está en una reserva activa',
+        error: PRODUCTO_ERROR_CODES.PRODUCTO_EN_RESERVA,
+      });
+    }
+
+    try {
+      await this.prisma.producto.delete({ where: { sku } });
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: 'Error al eliminar producto',
+        error: ERROR_CODES.ERROR_INTERNO,
+      });
+    }
   }
 }
