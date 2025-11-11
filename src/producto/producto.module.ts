@@ -3,9 +3,10 @@ import { ProductoController } from './producto.controller';
 import { ProductoService } from './producto.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { AuthModule } from 'src/auth/auth.module';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule],
+  imports: [PrismaModule, AuthModule, RedisModule],
   controllers: [ProductoController],
   providers: [ProductoService],
 })
