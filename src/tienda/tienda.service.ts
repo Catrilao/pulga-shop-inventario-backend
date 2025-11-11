@@ -17,10 +17,19 @@ export class TiendaService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTiendaDto: CreateTiendaDto, id_vendedor: number) {
+    const ciudadExiste = await this.prisma.ciudad.findUnique({
+      where: { id_ciudad: createTiendaDto.id_ciudad },
+    });
+    if (!ciudadExiste) {
+      throw new NotFoundException({
+        message: `La ciudad con el ID: "${createTiendaDto.nombre}" no existe`,
+        error: TIENDA_ERROR_CODES.CIUDAD_NO_EXISTE,
+      });
+    }
+
     const exists = await this.prisma.tienda.findFirst({
       where: { nombre: createTiendaDto.nombre },
     });
-
     if (exists) {
       throw new ConflictException({
         message: `Vendedor ya tiene una tienda con el nombre: "${createTiendaDto.nombre}"`,
