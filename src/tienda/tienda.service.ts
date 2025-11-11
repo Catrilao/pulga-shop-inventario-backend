@@ -22,7 +22,7 @@ export class TiendaService {
     });
     if (!ciudadExiste) {
       throw new NotFoundException({
-        message: `La ciudad con el ID: "${createTiendaDto.nombre}" no existe`,
+        message: `La ciudad con el ID: '${createTiendaDto.id_ciudad}' no existe`,
         error: TIENDA_ERROR_CODES.CIUDAD_NO_EXISTE,
       });
     }
