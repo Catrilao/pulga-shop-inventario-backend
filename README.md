@@ -64,25 +64,39 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 
 #### Base de Datos Relacional (Postgree)
 
-**Tabla: `tienda`**
+**Tabla: `ciudad`**
 | Atributo | Tipo | Nulo | Clave | Descripción |
 |----------|------|------|-------|-------------|
-| `id_tienda` | INT AUTO_INCREMENT | NO | PK | Identificador único de la tienda |
-| `id_vendedor` | BIGINT | NO | - | Referencia al vendedor dueño (módulo externo) |
-| `nombre` | VARCHAR(100) | NO | - | Nombre de la tienda |
-| `direccion` | VARCHAR(200) | NO | - | Dirección física de la tienda |
-| `descripcion` | text | NO | - |  Descripcion de la tienda |
-| `telefono` | VARCHAR(20) | NO | - | Teléfono de contacto |
-| `fecha_creacion` | DATE | NO | - | Fecha de registro en el sistema |
+| `id_ciudad` | INT AUTO_INCREMENT | NO | PK | Identificador único de la ciudad |
+| `nombre` | VARCHAR(100) | NO | UNIQUE | Nombre oficial de la ciudad |
+
+
+**Tabla: `tienda`**
+| Atributo | Tipo | Nulo | Clave | Valor por defecto |Descripción |
+|----------|------|------|-------|-------------------|------------|
+| `id_tienda` | INT AUTO_INCREMENT | NO | PK | - | Identificador único de la tienda |
+| `id_vendedor` | BIGINT | NO | - | - | Referencia al vendedor dueño (módulo externo) |
+| `nombre` | VARCHAR(100) | NO | - | - | Nombre de la tienda |
+| `id_ciudad` | INT | NO | FK | - | Clave foranea para la ciudad |
+| `direccion` | VARCHAR(200) | NO | - | - | Dirección física de la tienda |
+| `descripcion` | text | NO | - | - |  Descripcion de la tienda |
+| `telefono` | VARCHAR(20) | NO | - | - | Teléfono de contacto |
+| `fecha_creacion` | TIMESTAMP | SI | - | CURRENT_TIMESTAMP | Fecha y hora en que la tienda fue registrada en el sistema |
+| `online` | BOOLEAN | NO | - | - | Indica si la tienda tiene presencia online |
 
 **Tabla: `producto`**
-| Atributo | Tipo | Nulo | Clave | Descripción |
-|----------|------|------|-------|-------------|
-| `sku` | VARCHAR | NO | PK | Identificador único del producto |
-| `id_tienda` | INT | NO | FK | Tienda propietaria del producto |
-| `cantidad` | INT | NO | - | Stock disponible en inventario |
-| `precio` | INT | NO | - | Precio de venta del producto |
-| `disponible` | BOOL | NO | - | Disponibilidad del producto |
+| Atributo | Tipo | Nulo | Clave | Valor por defecto | Descripción |
+|----------|------|------|-------|-------------------|-------------|
+| `id_producto` | INT AUTO_INCREMENT | NO | PK | - | Identificador único del producto |
+| `id_tienda` | INT | NO | FK | - | Identificador de la tienda a la que pertenece el producto |
+| `nombre` | VARCHAR(100) | NO | - | - | Nombre del producto |
+| `cantidad` | INT | NO | - | - | Cantidad disponible en inventario para este producto |
+| `sku` | VARCHAR(36) | NO | - | - | Código único de identificación del producto (Stock Keeping Unit) |
+| `condicion` | ENUM | SI | - | 'NUEVO' | Estado del producto (Nuevo, Usado, reacondicionado) |
+| `fecha_creacion` | TIMESTAMP | SI | - | CURRENT_TIMESTAMP | Fecha y hora de creación del registro del producto |
+| `marca` | VARCHAR(50) | SI | - | 'Genérica' | Marca del producto |
+| `categoria` | ENUM | SI | - | 'OTRO' | Categoría o tipo de producto |
+| `descripcion` | TEXT | SI | - | 'Sin descripción' | Descripción detallada del producto |
 
 #### Base de Datos en Memoria (Redis)
 
