@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
-import { v4 as uuidv4 } from 'uuid';
 import { TIENDA_ERROR_CODES } from 'src/tienda/constants/error-codes';
 import { GetProductoDto } from './dto/get-producto.dto';
 import { PageDto } from 'src/common/dto/page.dto';
@@ -15,13 +14,14 @@ import { QueryProductoDto } from './dto/query-producto.dto';
 import { ERROR_CODES } from 'src/common/constants/error-codes';
 import { Prisma } from 'generated/prisma';
 import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
+import { generateSKU } from './utils/generate-sku';
 
 @Injectable()
 export class ProductoService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProductoDto: CreateProductoDto) {
-    const { disponible, id_tienda, ...losDemas } = createProductoDto;
+    const { id_tienda, ...losDemas } = createProductoDto;
 
     const tiendaExiste = await this.prisma.tienda.findUnique({
       where: { id_tienda },
@@ -33,22 +33,27 @@ export class ProductoService {
       });
     }
 
+    const sku = generateSKU(
+      createProductoDto.id_tienda,
+      createProductoDto.nombre,
+      createProductoDto.marca,
+      createProductoDto.categoria,
+      createProductoDto.condicion,
+    );
+
     return await this.prisma.producto.create({
       data: {
-        sku: uuidv4(),
-        ...losDemas,
-        disponible: disponible ?? true,
+        sku,
         tienda: { connect: { id_tienda } },
+        ...losDemas,
       },
     });
   }
 
-  async findOne(
-    sku: string
-  ): Promise<GetProductoDto> {
+  async findOne(sku: string): Promise<GetProductoDto> {
     try {
       const producto = await this.prisma.producto.findUnique({
-        where: { sku }
+        where: { sku },
       });
 
       if (!producto) {
@@ -103,14 +108,14 @@ export class ProductoService {
           skip: queryDto.skip,
           take: queryDto.take,
           where,
-          orderBy: { id_tienda: queryDto.order },
+          orderBy: { fecha_creacion: queryDto.order },
         }),
         this.prisma.producto.count({ where }),
       ]);
 
-      if (productos.length) {
+      if (counter === 0) {
         throw new NotFoundException({
-          message: 'No existen productos registrados',
+          message: 'No existen productos registrados con los filtros aplicados',
           error: PRODUCTO_ERROR_CODES.INVENTARIO_VACIO,
         });
       }
@@ -122,6 +127,13 @@ export class ProductoService {
 
       return new PageDto(productos, pageMetaDto);
     } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+
       throw new InternalServerErrorException({
         message: 'Error al consultar los productos',
         error: ERROR_CODES.ERROR_INTERNO,
