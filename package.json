@@ -1,6 +1,6 @@
 {
     "name": "pulga-shop-inventario-backend",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "description": "Microservicio encargado de la gestión de productos, tiendas y reservas de stock para procesos de compra",
     "author": "",
     "private": true,
@@ -22,9 +22,9 @@
         "prisma:migrate": "prisma migrate dev",
         "prisma:studio": "prisma studio",
         "prisma:reset": "prisma migrate reset",
-        "generate:token": "npx ts-node src/auth/test/generate-test-token.ts"
+        "generate:token": "npx ts-node src/auth/test/generate-test-token.ts",
+        "postInstall": "prisma generate"
     },
-    "postInstall": "prisma generate",
     "dependencies": {
         "@nestjs/axios": "^4.0.1",
         "@nestjs/common": "^10.3.0",

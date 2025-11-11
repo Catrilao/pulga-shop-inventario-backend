@@ -10,9 +10,11 @@ import { getErrorCodeFromMetadata } from './common/decorators/error-code.decorat
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS para permitir conexiones desde el frontend
+  const RAW_CORS = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173'
+  const origins = RAW_CORS.split(',').map(o => o.trim()).filter(Boolean);
+
   app.enableCors({
-    origin: 'http://localhost:5173', // URL del frontend (Vite usa el puerto 5173 por defecto)
+    origin: origins,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
   });
@@ -48,8 +50,8 @@ async function bootstrap() {
     }),
   );
 
-  // Prefijo global para todas las rutas de la API
-  app.setGlobalPrefix('api');
+  const apiPrefix = process.env.API_PREFIX || 'api';
+  app.setGlobalPrefix(apiPrefix);
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
@@ -62,8 +64,8 @@ async function bootstrap() {
   }
 
   const port = process.env.PORT || 3000;
-  await app.listen(port);
-  console.log(`Aplicación ejecutándose en: http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0');
+  console.log(`Aplicación ejecutándose en: http://localhost:${port}/${apiPrefix}`);
 }
 bootstrap().catch((err) => {
   console.error(`Error al iniciar la aplicación: ${err}`);
