@@ -65,10 +65,10 @@ model Producto {
     stock          Int
     precio         Int
     sku            String     @unique
-    condicion      Condicion
+    condicion      Condicion? @default(NUEVO)
     fecha_creacion DateTime   @default(now())
     marca          String?
-    categoria      Categoria?
+    categoria      Categoria? @default(GENERAL)
     descripcion    String?
 
     @@map("producto")

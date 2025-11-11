@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "producto" ALTER COLUMN "condicion" DROP NOT NULL,
+ALTER COLUMN "condicion" SET DEFAULT 'NUEVO',
+ALTER COLUMN "categoria" SET DEFAULT 'GENERAL';
