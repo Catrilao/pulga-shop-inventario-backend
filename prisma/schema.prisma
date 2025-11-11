@@ -15,24 +15,61 @@ model Tienda {
     id_tienda      Int        @id @default(autoincrement())
     id_vendedor    BigInt
     nombre         String
+    id_ciudad      Int
     direccion      String
     descripcion    String
     telefono       String?
     fecha_creacion DateTime   @default(now())
+    online         Boolean
     Producto       Producto[]
+    Ciudad         Ciudad     @relation(fields: [id_ciudad], references: [id_ciudad])
+
+    @@map("tienda")
+}
+
+model Ciudad {
+    id_ciudad Int      @id @default(autoincrement())
+    nombre    String   @unique
+    tiendas   Tienda[]
+
+    @@map("ciudad")
+}
+
+enum Condicion {
+    NUEVO
+    USADO
+    REACONDICIONADO
+}
+
+enum Categoria {
+    ELECTRÓNICA
+    ROPA
+    CALZADO
+    HOGAR
+    JUGUETES
+    DEPORTES
+    LIBROS
+    ALIMENTOS
+    BELLEZA
+    OFICINA
+    AUTOMOTRIZ
+    MASCOTAS
+    GENERAL
 }
 
 model Producto {
-    id_producto    Int      @id @default(autoincrement())
-    tienda         Tienda   @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
+    id_producto    Int        @id @default(autoincrement())
+    tienda         Tienda     @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
     id_tienda      Int
     nombre         String
     stock          Int
     precio         Int
-    sku            String   @unique
-    condicion      String
-    fecha_creacion DateTime @default(now())
+    sku            String     @unique
+    condicion      Condicion
+    fecha_creacion DateTime   @default(now())
     marca          String?
-    categoria      String?
+    categoria      Categoria?
     descripcion    String?
+
+    @@map("producto")
 }
