@@ -5,6 +5,7 @@ export function generateSKU(
   categoria: string,
   condicion: string,
 ): string {
+  // Ejemplo de formato: P1-NOM-MAR-CAT-CON
   const nombreCodigo = nombre.substring(0, 3).toUpperCase();
   const marcaCodigo = marca.substring(0, 3).toUpperCase();
   const categoriaCodigo = categoria.substring(0, 3).toUpperCase();

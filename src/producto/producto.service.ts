@@ -15,6 +15,7 @@ import { ERROR_CODES } from 'src/common/constants/error-codes';
 import { Prisma } from 'generated/prisma';
 import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
 import { generateSKU } from './utils/generate-sku';
+import { UpdateProductoDto } from './dto/update-producto.dto';
 
 @Injectable()
 export class ProductoService {
@@ -139,5 +140,53 @@ export class ProductoService {
         error: ERROR_CODES.ERROR_INTERNO,
       });
     }
+  }
+
+  async update(
+    id_vendedor: number,
+    sku: string,
+    updateProductoDto: UpdateProductoDto,
+  ) {
+    const producto = await this.prisma.producto.findUnique({
+      where: { sku },
+      include: { tienda: true },
+    });
+    if (!producto) {
+      throw new NotFoundException({
+        message: `El producto con SKU ${sku} no existe`,
+        error: ERROR_CODES.NO_ENCONTRADO,
+      });
+    }
+
+    if (producto.tienda.id_vendedor !== BigInt(id_vendedor)) {
+      throw new BadRequestException({
+        message: 'No tienes permisos para actualizar este producto',
+        error: ERROR_CODES.NO_AUTORIZADO,
+      });
+    }
+
+    if (updateProductoDto.stock !== undefined && updateProductoDto.stock < 0) {
+      throw new BadRequestException({
+        message: 'El stock no puede ser negativo',
+        error: PRODUCTO_ERROR_CODES.STOCK_INVALIDO,
+      });
+    }
+
+    if (
+      updateProductoDto.precio !== undefined &&
+      updateProductoDto.precio < 0
+    ) {
+      throw new BadRequestException({
+        message: 'El precio no puede ser negativo',
+        error: PRODUCTO_ERROR_CODES.PRECIO_INVALIDO,
+      });
+    }
+
+    const updatedProducto = await this.prisma.producto.update({
+      where: { sku },
+      data: updateProductoDto,
+    });
+
+    return updatedProducto;
   }
 }

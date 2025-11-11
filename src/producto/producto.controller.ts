@@ -20,6 +20,7 @@ import { PageDto } from 'src/common/dto/page.dto';
 import { GetProductoDto } from './dto/get-producto.dto';
 import { QueryProductoDto } from './dto/query-producto.dto';
 import { Public } from 'src/auth/decorators/is-public.decorator';
+import { UpdateProductoDto } from './dto/update-producto.dto';
 
 @Controller('productos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,5 +48,16 @@ export class ProductoController {
     @Query() queryProductoDto: QueryProductoDto,
   ): Promise<PageDto<GetProductoDto>> {
     return this.productoService.findAll(id_vendedor, queryProductoDto);
+  }
+
+  @Patch(':sku')
+  @Roles('vendedor')
+  @HttpCode(HttpStatus.OK)
+  async update(
+    @CurrentUser('id') id_vendedor: number,
+    @Param('sku') sku: string,
+    @Body() updateProductoDto: UpdateProductoDto,
+  ): Promise<GetProductoDto> {
+    return this.productoService.update(id_vendedor, sku, updateProductoDto);
   }
 }
