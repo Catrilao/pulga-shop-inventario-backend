@@ -5,20 +5,21 @@ import { PrismaModule } from './prisma/prisma.module';
 import { TiendaModule } from './tienda/tienda.module';
 import { ProductoModule } from './producto/producto.module';
 import { RedisModule } from './redis/redis.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
-    // Carga y valida las variables de entorno
     ConfigModule.forRoot({
-      isGlobal: true, // Disponible en toda la aplicación
+      isGlobal: true,
     }),
-
-    // Módulos de la aplicación
     AuthModule,
     TiendaModule,
     PrismaModule,
     ProductoModule,
     RedisModule,
   ],
+  controllers: [AppController],
+  providers: [AppService]
 })
 export class AppModule {}
