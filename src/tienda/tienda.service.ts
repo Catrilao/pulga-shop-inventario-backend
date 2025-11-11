@@ -28,7 +28,7 @@ export class TiendaService {
     }
 
     const exists = await this.prisma.tienda.findFirst({
-      where: { nombre: createTiendaDto.nombre },
+      where: { nombre: createTiendaDto.nombre, activo: true },
     });
     if (exists) {
       throw new ConflictException({
@@ -52,7 +52,7 @@ export class TiendaService {
 
   async findOne(id_tienda: number) {
     const tienda = await this.prisma.tienda.findUnique({
-      where: { id_tienda },
+      where: { id_tienda, activo: true },
     });
 
     if (!tienda) {
@@ -73,7 +73,7 @@ export class TiendaService {
       this.prisma.tienda.findMany({
         skip: pageOptionsDto.skip,
         take: pageOptionsDto.take,
-        where: { id_vendedor },
+        where: { id_vendedor, activo: true },
         orderBy: { fecha_creacion: pageOptionsDto.order },
       }),
       this.prisma.tienda.count(),

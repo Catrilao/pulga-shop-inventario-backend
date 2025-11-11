@@ -29,7 +29,7 @@ export class ProductoService {
     const { id_tienda, ...losDemas } = createProductoDto;
 
     const tiendaExiste = await this.prisma.tienda.findUnique({
-      where: { id_tienda },
+      where: { id_tienda, activo: true },
     });
     if (!tiendaExiste) {
       throw new NotFoundException({
@@ -58,7 +58,10 @@ export class ProductoService {
   async findOne(sku: string): Promise<GetProductoDto> {
     try {
       const producto = await this.prisma.producto.findUnique({
-        where: { sku },
+        where: {
+          sku,
+          activo: true,
+        },
       });
 
       if (!producto) {
@@ -92,6 +95,7 @@ export class ProductoService {
     }
 
     const where: Prisma.ProductoWhereInput = {
+      activo: true,
       tienda: { id_vendedor },
       ...(queryDto.disponible !== undefined && {
         disponible: queryDto.disponible,
@@ -152,7 +156,10 @@ export class ProductoService {
     updateProductoDto: UpdateProductoDto,
   ) {
     const producto = await this.prisma.producto.findUnique({
-      where: { sku },
+      where: {
+        sku,
+        activo: true,
+      },
       include: { tienda: true },
     });
     if (!producto) {
@@ -187,7 +194,10 @@ export class ProductoService {
     }
 
     const updatedProducto = await this.prisma.producto.update({
-      where: { sku },
+      where: {
+        sku,
+        activo: true,
+      },
       data: updateProductoDto,
     });
 
@@ -196,7 +206,7 @@ export class ProductoService {
 
   async delete(id_vendedor: number, sku: string): Promise<void> {
     const producto = await this.prisma.producto.findUnique({
-      where: { sku },
+      where: { sku, activo: true },
       include: { tienda: true },
     });
 
@@ -223,7 +233,10 @@ export class ProductoService {
     }
 
     try {
-      await this.prisma.producto.delete({ where: { sku } });
+      await this.prisma.producto.update({
+        where: { sku },
+        data: { activo: false },
+      });
     } catch (error) {
       throw new InternalServerErrorException({
         message: 'Error al eliminar producto',

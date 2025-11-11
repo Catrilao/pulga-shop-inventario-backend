@@ -21,9 +21,11 @@ model Tienda {
     telefono       String?
     fecha_creacion DateTime   @default(now())
     online         Boolean
+    activo         Boolean    @default(true)
     Producto       Producto[]
     Ciudad         Ciudad     @relation(fields: [id_ciudad], references: [id_ciudad])
 
+    @@index([id_vendedor])
     @@map("tienda")
 }
 
@@ -70,6 +72,8 @@ model Producto {
     marca          String?
     categoria      Categoria? @default(GENERAL)
     descripcion    String?
+    activo         Boolean    @default(true)
 
+    @@index([id_tienda])
     @@map("producto")
 }
