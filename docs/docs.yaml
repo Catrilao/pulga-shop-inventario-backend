@@ -133,15 +133,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductosPaginados'
-        '404':
-          description: Inventario vacío
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: No existen productos registrados con los filtros aplicados
-                error: INVENTARIO_VACIO
         '400':
           description: Rango inválido
           content:

@@ -122,13 +122,6 @@ export class ProductoService {
         this.prisma.producto.count({ where }),
       ]);
 
-      if (counter === 0) {
-        throw new NotFoundException({
-          message: 'No existen productos registrados con los filtros aplicados',
-          error: PRODUCTO_ERROR_CODES.INVENTARIO_VACIO,
-        });
-      }
-
       const pageMetaDto = new PageMetaDto({
         pageOptionsDto: queryDto,
         itemCount: counter,
