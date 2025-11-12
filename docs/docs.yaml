@@ -151,6 +151,16 @@ paths:
               example:
                 message: Sesión no iniciada
                 error: NO_AUTORIZADO
+        '409':
+          descripcion: Conflicto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Producto con SKU 'P1-POL-ADI-ROP-NUE' no encontrado
+                code: ERROR_CODES.NO_ENCONTRADO,
+
         '500':
           $ref: '#/components/responses/ErrorServidor'
 

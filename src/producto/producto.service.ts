@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -45,6 +46,14 @@ export class ProductoService {
       createProductoDto.categoria,
       createProductoDto.condicion,
     );
+
+    const productoExiste = await this.prisma.producto.findUnique({ where: { sku } });
+    if (productoExiste) {
+      throw new ConflictException({
+        message: `Producto con SKU: '${sku}' ya existe`,
+        error: PRODUCTO_ERROR_CODES.PRODUCTO_YA_EXISTE,
+      });
+    }
 
     return await this.prisma.producto.create({
       data: {
