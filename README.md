@@ -99,7 +99,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `marca` | VARCHAR(50) | SI | - | 'Genérica' | Marca del producto |
 | `categoria` | ENUM | SI | - | 'OTRO' | Categoría o tipo de producto |
 | `descripcion` | TEXT | SI | - | 'Sin descripción' | Descripción detallada del producto |
-| `activo` | BOOLEAN | SI | - | TRUE | Indica la disponibilidad de la tienda. |
+| `activo` | BOOLEAN | SI | - | TRUE | Indica la disponibilidad del producto. |
 
 #### Base de Datos en Memoria (Redis)
 
