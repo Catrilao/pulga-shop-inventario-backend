@@ -9,6 +9,8 @@ info:
 servers:
   - url: http://localhost:3000/api
     descripcion: Local (desarrollo)
+  - url: https://pulga-shop-inventario-api.onrender.com/api
+    description: Cloud (producción)
 tags:
   - name: Productos
     description: Gestión de productos y stock
