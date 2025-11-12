@@ -400,7 +400,6 @@ dist
 .serverless/**/*.zip
 package-lock.json
 yarn.lock
-pnpm-lock.yaml
 
 # Prisma
 *.db
