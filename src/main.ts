@@ -10,8 +10,13 @@ import { getErrorCodeFromMetadata } from './common/decorators/error-code.decorat
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const RAW_CORS = process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173'
-  const origins = RAW_CORS.split(',').map(o => o.trim()).filter(Boolean);
+  const RAW_CORS =
+    process.env.CORS_ORIGINS ||
+    process.env.CORS_ORIGIN ||
+    'http://localhost:5173';
+  const origins = RAW_CORS.split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
 
   app.enableCors({
     origin: origins,
@@ -65,7 +70,9 @@ async function bootstrap() {
 
   const port = process.env.PORT || 3000;
   await app.listen(port, '0.0.0.0');
-  console.log(`Aplicación ejecutándose en: http://localhost:${port}/${apiPrefix}`);
+  console.log(
+    `Aplicación ejecutándose en: http://localhost:${port}/${apiPrefix}`,
+  );
 }
 bootstrap().catch((err) => {
   console.error(`Error al iniciar la aplicación: ${err}`);
