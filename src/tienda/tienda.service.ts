@@ -16,7 +16,10 @@ import { serializeTienda } from './utils/serialize-tienda';
 export class TiendaService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createTiendaDto: CreateTiendaDto, id_vendedor: number) {
+  async create(
+    createTiendaDto: CreateTiendaDto,
+    id_vendedor: number,
+  ): Promise<GetTiendaDto> {
     const ciudadExiste = await this.prisma.ciudad.findUnique({
       where: { id_ciudad: createTiendaDto.id_ciudad },
     });
@@ -44,13 +47,10 @@ export class TiendaService {
       },
     });
 
-    return {
-      ...tienda,
-      id_vendedor: tienda.id_vendedor.toString(),
-    };
+    return serializeTienda(tienda);
   }
 
-  async findOne(id_tienda: number) {
+  async findOne(id_tienda: number): Promise<GetTiendaDto> {
     const tienda = await this.prisma.tienda.findUnique({
       where: { id_tienda, activo: true },
     });
