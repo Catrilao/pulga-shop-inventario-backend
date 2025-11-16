@@ -47,7 +47,9 @@ export class ProductoService {
       createProductoDto.condicion,
     );
 
-    const productoExiste = await this.prisma.producto.findUnique({ where: { sku } });
+    const productoExiste = await this.prisma.producto.findUnique({
+      where: { sku },
+    });
     if (productoExiste) {
       throw new ConflictException({
         message: `Producto con SKU: '${sku}' ya existe`,
@@ -85,7 +87,7 @@ export class ProductoService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      
+
       throw new InternalServerErrorException({
         message: `Error al consultar el producto con SKU '${sku}'`,
         error: ERROR_CODES.ERROR_INTERNO,
