@@ -7,6 +7,7 @@ import { ProductoModule } from './producto/producto.module';
 import { RedisModule } from './redis/redis.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -18,8 +19,9 @@ import { AppService } from './app.service';
     PrismaModule,
     ProductoModule,
     RedisModule,
+    HttpModule,
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService],
 })
 export class AppModule {}
