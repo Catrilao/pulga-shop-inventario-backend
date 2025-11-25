@@ -136,7 +136,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `id_tienda` | INT | NO | FK | - | Identificador de la tienda a la que pertenece el producto |
 | `nombre` | VARCHAR(100) | NO | - | - | Nombre del producto |
 | `stock` | INT | NO | - | - | Cantidad disponible en inventario para este producto |
-| `precio` | INT | NO | - | - | Precio del producto. |
+| `costo` | INT | NO | - | - | Precio del producto. |
 | `sku` | VARCHAR(36) | NO | - | - | Código único de identificación del producto (Stock Keeping Unit) |
 | `condicion` | ENUM | SI | - | 'NUEVO' | Estado del producto (Nuevo, Usado, reacondicionado) |
 | `fecha_creacion` | TIMESTAMP | SI | - | CURRENT_TIMESTAMP | Fecha y hora de creación del registro del producto |
@@ -144,6 +144,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `categoria` | ENUM | SI | - | 'OTRO' | Categoría o tipo de producto |
 | `descripcion` | TEXT | SI | - | 'Sin descripción' | Descripción detallada del producto |
 | `activo` | BOOLEAN | SI | - | TRUE | Indica la disponibilidad del producto. |
+| `foto_referencia` | TEXT | SI | - | - | URL de la imagen de referencia del producto, almacenada en Cloudinary. |
 
 #### Base de Datos en Memoria (Redis)
 
