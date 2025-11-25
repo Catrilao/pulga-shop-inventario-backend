@@ -65,9 +65,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                message: La tienda no existe
-                error: TIENDA_NO_EXISTE
+        '409':
+          description: Producto con SKU ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
           description: No autorizado
           content:
@@ -85,7 +88,7 @@ paths:
       summary: Listar productos del vendedor
       description: >
         Devuelve productos activos pertenecientes a las tiendas del vendedor autenticado. <br>
-        Soporta paginación y filtros por tienda y rango de precio.
+        Soporta paginación y filtros por tienda, rango de precio y disponibilidad.
       security:
         - bearerAuth: []
       parameters:
@@ -107,17 +110,28 @@ paths:
           schema:
             type: number
           description: Precio máximo (lte)
+        - name: disponible
+          in: query
+          required: false
+          schema:
+            type: boolean
+          description: Filtra por disponibilidad del producto
         - name: page
           in: query
           required: false
           schema:
             type: integer
+            minimum: 1
+            default: 1
           description: Página (>=1)
         - name: take
           in: query
           required: false
           schema:
             type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
           description: Tamaño de página (1-30)
         - name: order
           in: query
@@ -125,6 +139,7 @@ paths:
           schema:
             type: string
             enum: [ASC, DESC]
+            default: ASC
           description: Orden por fecha_creacion
       responses:
         '200':
@@ -134,7 +149,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductosPaginados'
         '400':
-          description: Rango inválido
+          description: Rango inválido (precio_min > precio_max)
           content:
             application/json:
               schema:
@@ -197,7 +212,8 @@ paths:
       summary: Actualizar producto
       description: >
         Actualiza campos del producto. Todos los campos son opcionales, se requiere al menos uno. <br>
-        Validaciones de no negativo para stock y precio.
+        Validaciones de no negativo para stock y precio. <br>
+        Solo el vendedor dueño del producto puede actualizarlo.
       security:
         - bearerAuth: []
       parameters:
@@ -216,7 +232,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductoGet'
         '400':
-          description: Datos inválidos
+          description: Datos inválidos o no autorizado
           content:
             application/json:
               schema:
@@ -261,28 +277,22 @@ paths:
       parameters:
         - $ref: '#/components/parameters/skuParam'
       responses:
-        '204':
-          description: Eliminado
+        '200':
+          description: Eliminado exitosamente
         '404':
           description: Producto no existe
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                message: El producto con SKU ABC no existe
-                error: NO_ENCONTRADO
-        '401':
-          description: No autorizado
+        '400':
+          description: No autorizado o producto en reserva activa
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                message: No tienes permisos para eliminar este producto
-                error: NO_AUTORIZADO
-        '409':
-          description: Producto en reserva activa
+        '401':
+          description: No autorizado
           content:
             application/json:
               schema:
@@ -307,12 +317,17 @@ paths:
           required: false
           schema:
             type: integer
+            minimum: 1
+            default: 1
           description: Página (>=1)
         - name: take
           in: query
           required: false
           schema:
             type: integer
+            minimum: 1
+            maximum: 30
+            default: 10
           description: Tamaño de página (1-30)
         - name: order
           in: query
@@ -320,6 +335,7 @@ paths:
           schema:
             type: string
             enum: [ASC, DESC]
+            default: ASC
           description: Orden por fecha_creacion
       responses:
         '200':
@@ -412,61 +428,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              example:
-                message: Tienda no existe
-                error: TIENDA_NO_ENCONTRADA
-        '500':
-          $ref: '#/components/responses/ErrorServidor'
-
-    patch:
-      tags: [Tiendas]
-      summary: Actualizar tienda
-      description: >
-        Actualiza uno o más campos (mínimo 1). Campos permitidos: nombre, descripcion, direccion, telefono.
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: '#/components/parameters/id_tiendaParam'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TiendaPatch'
-      responses:
-        '200':
-          description: Tienda actualizada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TiendaGet'
-        '400':
-          description: Cuerpo vacío
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: Debe haber al menos un campo
-                error: CUERPO_VACIO
-        '401':
-            description: No autorizado
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-                example:
-                  message: No tienes permisos para editar esta tienda
-                  error: NO_AUTORIZADO
-        '404':
-          description: No encontrada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: Tienda no existe
-                error: TIENDA_NO_ENCONTRADA
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -594,22 +555,11 @@ components:
           type: string
         categoria:
           type: string
-          enum:
-            - ELECTRÓNICA
-            - ROPA
-            - CALZADO
-            - HOGAR
-            - JUGUETES
-            - DEPORTES
-            - LIBROS
-            - ALIMENTOS
-            - BELLEZA
-            - OFICINA
-            - AUTOMOTRIZ
-            - MASCOTAS
-            - GENERAL
+          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
         descripcion:
           type: string
+        activo:
+          type: boolean
       required:
         - id_producto
         - id_tienda
@@ -619,6 +569,7 @@ components:
         - sku
         - condicion
         - fecha_creacion
+        - activo
       example:
         id_producto: 10
         id_tienda: 3
@@ -631,41 +582,42 @@ components:
         marca: "Genérica"
         categoria: "GENERAL"
         descripcion: "Sin descripcion"
+        activo: true
 
     ProductoPost:
       type: object
       properties:
         id_tienda:
           type: integer
+          minimum: 1
         nombre:
           type: string
+          minLength: 3
+          maxLength: 100
         stock:
           type: integer
+          minimum: 1
         precio:
           type: integer
+          minimum: 1
         condicion:
           type: string
           enum: [NUEVO, USADO, REACONDICIONADO]
+          default: NUEVO
         marca:
           type: string
+          minLength: 3
+          maxLength: 50
+          default: "Genérica"
         categoria:
           type: string
-          enum:
-            - ELECTRÓNICA
-            - ROPA
-            - CALZADO
-            - HOGAR
-            - JUGUETES
-            - DEPORTES
-            - LIBROS
-            - ALIMENTOS
-            - BELLEZA
-            - OFICINA
-            - AUTOMOTRIZ
-            - MASCOTAS
-            - GENERAL
+          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
+          default: GENERAL
         descripcion:
           type: string
+          minLength: 3
+          maxLength: 1000
+          default: "Sin descripcion"
       required:
         - id_tienda
         - nombre
@@ -687,35 +639,31 @@ components:
       properties:
         id_tienda:
           type: integer
+          minimum: 1
         nombre:
           type: string
+          minLength: 3
+          maxLength: 100
         stock:
           type: integer
+          minimum: 0
         precio:
           type: integer
+          minimum: 0
         condicion:
           type: string
           enum: [NUEVO, USADO, REACONDICIONADO]
         marca:
           type: string
+          minLength: 3
+          maxLength: 50
         categoria:
           type: string
-          enum:
-            - ELECTRÓNICA
-            - ROPA
-            - CALZADO
-            - HOGAR
-            - JUGUETES
-            - DEPORTES
-            - LIBROS
-            - ALIMENTOS
-            - BELLEZA
-            - OFICINA
-            - AUTOMOTRIZ
-            - MASCOTAS
-            - GENERAL
+          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
         descripcion:
           type: string
+          minLength: 3
+          maxLength: 1000
       example:
         precio: 17990
         stock: 30
@@ -747,30 +695,20 @@ components:
         data:
           - id_producto: 1
             id_tienda: 3
-            nombre: "Mouse"
-            stock: 10
-            precio: 10000
-            sku: "T3-MOUSE-GENERAL-NUEVO"
+            nombre: "Mouse Gamer"
+            stock: 25
+            precio: 19990
+            sku: "T3-MOUSE-GAMER-GENERAL-NUEVO"
             condicion: NUEVO
             fecha_creacion: "2025-01-10T12:00:00Z"
             marca: "Genérica"
-            categoria: GENERAL
+            categoria: "GENERAL"
             descripcion: "Sin descripcion"
-          - id_producto: 2
-            id_tienda: 3
-            nombre: "Teclado"
-            stock: 5
-            precio: 25000
-            sku: "T3-TECLADO-GENERAL-NUEVO"
-            condicion: NUEVO
-            fecha_creacion: "2025-01-11T12:00:00Z"
-            marca: "Genérica"
-            categoria: GENERAL
-            descripcion: "Sin descripcion"
+            activo: true
         meta:
           page: 1
           take: 10
-          itemCount: 2
+          itemCount: 1
           pageCount: 1
           hasPreviousPage: false
           hasNextPage: false
@@ -780,10 +718,13 @@ components:
       properties:
         nombre:
           type: string
+          maxLength: 100
         id_ciudad:
           type: integer
+          minimum: 1
         descripcion:
           type: string
+          maxLength: 200
         direccion:
           type: string
         telefono:
@@ -805,28 +746,13 @@ components:
         telefono: "912345678"
         online: true
 
-    TiendaPatch:
-      type: object
-      minProperties: 1
-      properties:
-        nombre:
-          type: string
-        descripcion:
-          type: string
-        direccion:
-          type: string
-        telefono:
-          type: string
-      example:
-        descripcion: "Nueva descripción"
-
     TiendaGet:
       type: object
       properties:
         id_tienda:
           type: integer
         id_vendedor:
-          type: string
+          type: integer
         nombre:
           type: string
         id_ciudad:
@@ -854,7 +780,7 @@ components:
         - online
       example:
         id_tienda: 3
-        id_vendedor: "456"
+        id_vendedor: 456
         nombre: "CompuShop"
         id_ciudad: 1
         descripcion: "Tecnología y accesorios"
@@ -888,7 +814,7 @@ components:
       example:
         data:
           - id_tienda: 3
-            id_vendedor: "456"
+            id_vendedor: 456
             nombre: "CompuShop"
             id_ciudad: 1
             descripcion: "Tecnología y accesorios"
@@ -945,7 +871,7 @@ components:
         - message
         - error
       example:
-        message: direccion must be a string
+        message: direccion debe ser texto
         error: Bad request
 
   responses:
