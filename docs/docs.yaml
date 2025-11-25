@@ -8,9 +8,9 @@ info:
     Autenticación vía JWT en el header: Authorization: Bearer {token}
 servers:
   - url: http://localhost:3000/api
-    descripcion: Local (desarrollo)
+    descripcion: Local (development)
   - url: https://pulga-shop-inventario-api.onrender.com/api
-    description: Cloud (producción)
+    description: Cloud (staging)
 tags:
   - name: Productos
     description: Gestión de productos y stock
