@@ -69,6 +69,6 @@ export class ProductoController {
     @CurrentUser('id') id_vendedor: number,
     @Param('sku') sku: string,
   ): Promise<void> {
-    this.productoService.delete(id_vendedor, sku);
+    await this.productoService.delete(id_vendedor, sku);
   }
 }

@@ -19,6 +19,12 @@ export class GetTiendaDto {
   @ApiProperty({ example: '9123456789' })
   telefono?: string;
 
+  @ApiProperty({ example: true })
+  online: boolean;
+
+  @ApiProperty({ example: 10 })
+  id_ciudad: number;
+
   @ApiProperty({
     type: 'string',
     format: 'date-time',

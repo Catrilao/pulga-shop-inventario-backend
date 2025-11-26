@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNumber,
   IsOptional,
@@ -19,6 +20,10 @@ const toBoolean = (value: unknown): boolean | undefined => {
 };
 
 export class QueryProductoDto extends PageOptionsDto {
+  @IsOptional()
+  @IsEnum(['true', 'false', 'all'])
+  activo?: 'true' | 'false' | 'all';
+
   @IsOptional()
   @IsString()
   sku?: string;

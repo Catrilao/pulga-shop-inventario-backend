@@ -11,15 +11,23 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Ciudad {
+    id_ciudad Int      @id @default(autoincrement())
+    nombre    String   @unique @db.VarChar(100)
+    tiendas   Tienda[]
+
+    @@map("ciudad")
+}
+
 model Tienda {
     id_tienda      Int        @id @default(autoincrement())
     id_vendedor    BigInt
-    nombre         String
+    nombre         String     @db.VarChar(100)
     id_ciudad      Int
-    direccion      String
-    descripcion    String
-    telefono       String?
-    fecha_creacion DateTime   @default(now())
+    direccion      String     @db.VarChar(200)
+    descripcion    String     @db.Text
+    telefono       String     @db.VarChar(20)
+    fecha_creacion DateTime   @default(now()) @db.Timestamp()
     online         Boolean
     activo         Boolean    @default(true)
     Producto       Producto[]
@@ -27,14 +35,6 @@ model Tienda {
 
     @@index([id_vendedor])
     @@map("tienda")
-}
-
-model Ciudad {
-    id_ciudad Int      @id @default(autoincrement())
-    nombre    String   @unique
-    tiendas   Tienda[]
-
-    @@map("ciudad")
 }
 
 enum Condicion {
@@ -60,19 +60,24 @@ enum Categoria {
 }
 
 model Producto {
-    id_producto    Int        @id @default(autoincrement())
-    tienda         Tienda     @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
-    id_tienda      Int
-    nombre         String
-    stock          Int
-    precio         Int
-    sku            String     @unique
-    condicion      Condicion? @default(NUEVO)
-    fecha_creacion DateTime   @default(now())
-    marca          String?
-    categoria      Categoria? @default(GENERAL)
-    descripcion    String?
-    activo         Boolean    @default(true)
+    id_producto     Int        @id @default(autoincrement())
+    tienda          Tienda     @relation(fields: [id_tienda], references: [id_tienda], onDelete: Cascade, onUpdate: Cascade)
+    id_tienda       Int
+    nombre          String     @db.VarChar(100)
+    stock           Int
+    costo           Int
+    sku             String     @unique @db.VarChar(36)
+    condicion       Condicion? @default(NUEVO)
+    fecha_creacion  DateTime   @default(now()) @db.Timestamp()
+    marca           String?    @db.VarChar(50)
+    categoria       Categoria? @default(GENERAL)
+    descripcion     String?    @db.Text
+    activo          Boolean    @default(true)
+    foto_referencia String?    @db.Text
+    peso            Decimal    @db.Decimal(4, 1)
+    alto            Int
+    largo           Int
+    ancho           Int
 
     @@index([id_tienda])
     @@map("producto")

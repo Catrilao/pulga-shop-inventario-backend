@@ -18,15 +18,17 @@ import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
 import { generateSKU } from './utils/generate-sku';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { RedisService } from 'src/redis/redis.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductoService {
   constructor(
     private prisma: PrismaService,
     private redis: RedisService,
+    private cloudinary: CloudinaryService,
   ) {}
 
-  async create(createProductoDto: CreateProductoDto) {
+  async create(createProductoDto: CreateProductoDto, imagen?: Express.Multer.File) {
     const { id_tienda, ...losDemas } = createProductoDto;
 
     const tiendaExiste = await this.prisma.tienda.findUnique({
@@ -57,11 +59,17 @@ export class ProductoService {
       });
     }
 
+    let foto_referencia: string | undefined = null;
+    if (imagen) {
+      foto_referencia = await this.cloudinary.uploadImage(imagen);
+    }
+
     return await this.prisma.producto.create({
       data: {
         sku,
         tienda: { connect: { id_tienda } },
         ...losDemas,
+        ...(foto_referencia && { foto_referencia }),
       },
     });
   }
@@ -104,13 +112,18 @@ export class ProductoService {
       queryDto.precio_min &&
       queryDto.precio_max < queryDto.precio_min
     ) {
-      throw new BadRequestException(
-        'El precio mínimo no puede ser mayor que el precio máximo',
-      );
+      throw new BadRequestException({
+        message: 'El precio mínimo no puede ser mayor que el precio máximo',
+        error: PRODUCTO_ERROR_CODES.PRECIO_INVALIDO,
+      });
     }
 
     const where: Prisma.ProductoWhereInput = {
-      activo: true,
+      ...(queryDto.activo === 'true' || queryDto.activo === undefined
+        ? { activo:true }
+        : queryDto.activo === 'false'
+        ? { activo: false }
+        : {}),
       tienda: { id_vendedor },
       ...(queryDto.disponible !== undefined && {
         disponible: queryDto.disponible,
@@ -192,8 +205,8 @@ export class ProductoService {
     }
 
     if (
-      updateProductoDto.precio !== undefined &&
-      updateProductoDto.precio < 0
+      updateProductoDto.costo !== undefined &&
+      updateProductoDto.costo < 0
     ) {
       throw new BadRequestException({
         message: 'El precio no puede ser negativo',

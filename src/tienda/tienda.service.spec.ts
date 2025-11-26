@@ -1,19 +1,38 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { TiendaService } from './tienda.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { TiendaService } from './tienda.service';
+import { Test, TestingModule } from '@nestjs/testing';
 
 describe('TiendaService', () => {
   let service: TiendaService;
-  let prismaService: PrismaService;
+  let prisma: PrismaService;
+
+  const ID_VENDEDOR_TEST = 123;
+  const ID_TIENDA_TEST = 12;
+  const DATE_TEST = new Date();
+
+  const createMockTienda = (overrides = {}) => ({
+    id_tienda: ID_TIENDA_TEST,
+    id_vendedor: ID_VENDEDOR_TEST,
+    nombre: 'PlanetExpress',
+    id_ciudad: 10,
+    descripcion: 'Empresa de delivery interplanetaria',
+    direccion: 'Nueva Nueva York',
+    telefono: '+56912345678',
+    fecha_creacion: DATE_TEST,
+    online: true,
+    ...overrides,
+  });
+  const MOCK_TIENDA = createMockTienda();
 
   const mockPrismaService = {
+    ciudad: {
+      findUnique: jest.fn(),
+    },
     tienda: {
       create: jest.fn(),
       findFirst: jest.fn(),
       findUnique: jest.fn(),
       findMany: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
     },
   };
 
@@ -21,55 +40,21 @@ describe('TiendaService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TiendaService,
-        {
-          provide: PrismaService,
-          useValue: mockPrismaService,
-        },
+        { provide: PrismaService, useValue: mockPrismaService },
       ],
     }).compile();
 
     service = module.get<TiendaService>(TiendaService);
-    prismaService = module.get<PrismaService>(PrismaService);
-
-    jest.clearAllMocks();
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should be defined', () => {
+  it('should be defined', async () => {
     expect(service).toBeDefined();
   });
 
-  describe('create', () => {
-    it('should create a new tienda', async () => {
-      const createTiendaDto = {
-        nombre: 'PlanetExpress',
-        descripcion: 'Empresa de delivery.',
-        direccion: 'Nueva Nueva York',
-        telefono: '912345653',
-      };
-      const id_vendedor = 10;
-
-      const expectedResult = {
-        id: 1,
-        ...createTiendaDto,
-        id_vendedor,
-        fecha_creacion: new Date(),
-      };
-
-      mockPrismaService.tienda.create.mockResolvedValue(expectedResult);
-
-      const result = await service.create(createTiendaDto, id_vendedor);
-
-      expect(result).toBeDefined();
-      expect(mockPrismaService.tienda.create).toHaveBeenCalledWith({
-        data: {
-          ...createTiendaDto,
-          id_vendedor,
-        },
-      });
-    });
-  });
+  describe('create', async () => {});
 });

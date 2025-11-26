@@ -15,7 +15,7 @@ export class GetProductoDto {
   stock: number;
 
   @ApiProperty()
-  precio: number;
+  costo: number;
 
   @ApiProperty()
   sku: string;

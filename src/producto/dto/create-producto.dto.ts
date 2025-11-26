@@ -7,6 +7,8 @@ import {
   IsPositive,
   IsString,
   Length,
+  IsNumber,
+  Max,
 } from 'class-validator';
 import { ErrorCode } from 'src/common/decorators/error-code.decorator';
 import { PRODUCTO_ERROR_CODES } from '../constants/error-codes';
@@ -49,11 +51,11 @@ export class CreateProductoDto {
   stock: number;
 
   @Transform(({ value }) => toNumber(value))
-  @IsDefined({ message: 'Precio es requerido' })
-  @IsInt({ message: 'El precio debe ser un número entero' })
-  @IsPositive({ message: 'El precio debe ser al menos 1' })
+  @IsDefined({ message: 'Costo es requerido' })
+  @IsInt({ message: 'El costo debe ser un número entero' })
+  @IsPositive({ message: 'El costo debe ser al menos 1' })
   @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
-  precio: number;
+  costo: number;
 
   @IsOptional()
   @Transform(({ value }) => value?.trim().toUpperCase())
@@ -68,12 +70,12 @@ export class CreateProductoDto {
   @Length(3, 50, { message: 'La marca debe tener entre 3 y 50 carácteres' })
   @Transform(({ value }) => value?.trim())
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
-  marca?: string = 'Genérica';
+  marca?: string;
 
   @IsOptional()
   @Transform(({ value }) => value?.trim().toUpperCase())
   @IsEnum(Categoria, {
-    message: `La categoria debe ser una de las siguientes opciones: [${Object.values(Condicion).join(', ')}]`,
+    message: `La categoria debe ser una de las siguientes opciones: [${Object.values(Categoria).join(', ')}]`,
   })
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
   categoria?: Categoria = Categoria.GENERAL;
@@ -85,5 +87,42 @@ export class CreateProductoDto {
   })
   @Transform(({ value }) => value?.trim())
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
-  descripcion?: string = 'Sin descripcion';
+  descripcion?: string;
+
+  // @IsOptional()
+  // @IsString({ message: 'La foto_referencia debe ser un string' })
+  // @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
+  // foto_referencia?: string;
+
+  @Transform(({ value }) => toNumber(value))
+  @IsDefined({ message: 'Peso es requerido' })
+  @IsNumber(
+    { maxDecimalPlaces: 1 },
+    { message: 'El peso debe ser un número con máximo 1 decimal' },
+  )
+  @IsPositive({ message: 'El peso debe ser mayor a 0' })
+  @Max(999.9, { message: 'El peso no puede ser mayor a 999.9' })
+  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  peso: number;
+
+  @Transform(({ value }) => toNumber(value))
+  @IsDefined({ message: 'Alto es requerido' })
+  @IsInt({ message: 'El alto debe ser un número entero' })
+  @IsPositive({ message: 'El alto debe ser mayor a 0' })
+  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  alto: number;
+
+  @Transform(({ value }) => toNumber(value))
+  @IsDefined({ message: 'Largo es requerido' })
+  @IsInt({ message: 'El largo debe ser un número entero' })
+  @IsPositive({ message: 'El largo debe ser mayor a 0' })
+  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  largo: number;
+
+  @Transform(({ value }) => toNumber(value))
+  @IsDefined({ message: 'Ancho es requerido' })
+  @IsInt({ message: 'El ancho debe ser un número entero' })
+  @IsPositive({ message: 'El ancho debe ser mayor a 0' })
+  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  ancho: number;
 }

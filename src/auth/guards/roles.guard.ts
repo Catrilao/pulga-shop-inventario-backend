@@ -12,6 +12,7 @@ import { HttpService } from '@nestjs/axios';
 import { RedisService } from 'src/redis/redis.service';
 import { lastValueFrom } from 'rxjs';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { ERROR_CODES } from 'src/common/constants/error-codes';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -40,12 +41,64 @@ export class RolesGuard implements CanActivate {
     }
 
     const esVendedor = await this.verifyVendedor(user.id);
+    const esAdministrador = await this. verifyAdministrador(user.id);
 
     if (!roles) {
-      if (!esVendedor) {
-        throw new UnauthorizedException('El usuario no es un vendedor');
+      if (!esVendedor && !esAdministrador) {
+        throw new UnauthorizedException('El usuario no tiene los permisos suficientes');
       }
       return true;
+
+    }
+
+    if (roles.includes('vendedor') && esVendedor) {
+      return true;
+    }
+    if (roles.includes('administrador') && esAdministrador) {
+      return true;
+    }
+
+    throw new UnauthorizedException({
+      message: 'El usuario no tiene el rol requerido',
+      code: ERROR_CODES.NO_AUTORIZADO
+    });
+  }
+
+  private async verifyAdministrador(id_usuario: number): Promise<boolean> {
+    const redisClient = this.redisService.getClient();
+    const cacheKey = `administrador:${id_usuario}`;
+
+    const cached = await redisClient.get(cacheKey);
+    if (cached !== null) {
+      return cached === 'true';
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      this.logger.log(
+        `Simulando respuesta del servicio de autenticación para el usuario con ID: '${id_usuario}'`,
+      );
+
+      const esAdministrador = true;
+      await redisClient.set(cacheKey, esAdministrador.toString(), 'EX', 3600);
+      return esAdministrador;
+    }
+
+  try {
+      const response = await lastValueFrom(
+        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`),
+      );
+
+      const roles: string[] = response.data;
+      const esAdministrador = Array.isArray(roles) && roles.includes('administrador');
+
+      await redisClient.set(cacheKey, esAdministrador.toString(), 'EX', 3600);
+
+      return esAdministrador;
+    } catch (error) {
+      this.logger.error(
+        `Error al verificar el rol del usuario con ID ${id_usuario}: ${error.message}`,
+      );
+      throw new UnauthorizedException('Error al verificar el rol del usuario');
     }
   }
 
@@ -70,12 +123,11 @@ export class RolesGuard implements CanActivate {
 
     try {
       const response = await lastValueFrom(
-        this.httpService.get(
-          `${process.env.SERVICIO_AUTH_URL}/auth/me`,
-        ),
+        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`),
       );
 
-      const esVendedor = response.data?.esVendedor || false;
+      const roles: string[] = response.data;
+      const esVendedor = Array.isArray(roles) && roles.includes('vendedor');
 
       await redisClient.set(cacheKey, esVendedor.toString(), 'EX', 3600);
 

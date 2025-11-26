@@ -31,7 +31,7 @@ export class TiendaController {
     @Body() createTiendaDto: CreateTiendaDto,
     @CurrentUser('id') id_vendedor: number,
   ) {
-    return this.tiendaService.create(createTiendaDto, id_vendedor);
+    return await this.tiendaService.create(createTiendaDto, id_vendedor);
   }
 
   @Get(':id_tienda')
