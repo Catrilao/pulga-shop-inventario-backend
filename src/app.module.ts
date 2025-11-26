@@ -8,7 +8,6 @@ import { RedisModule } from './redis/redis.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpModule } from '@nestjs/axios';
-import { PruebaController } from './prueba/prueba.controller';
 
 @Module({
   imports: [
@@ -22,7 +21,7 @@ import { PruebaController } from './prueba/prueba.controller';
     RedisModule,
     HttpModule,
   ],
-  controllers: [AppController, PruebaController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
