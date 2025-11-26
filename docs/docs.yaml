@@ -705,10 +705,22 @@ components:
             categoria: "GENERAL"
             descripcion: "Sin descripcion"
             activo: true
+          - id_producto: 2
+            id_tienda: 3
+            nombre: "Teclado Mecánico"
+            stock: 15
+            precio: 45990
+            sku: "T3-TECLADO-MECÁNICO-ELECTRÓNICA-NUEVO"
+            condicion: NUEVO
+            fecha_creacion: "2025-01-11T14:30:00Z"
+            marca: "Logitech"
+            categoria: "ELECTRÓNICA"
+            descripcion: "Teclado mecánico RGB con switches azules"
+            activo: true
         meta:
           page: 1
           take: 10
-          itemCount: 1
+          itemCount: 2
           pageCount: 1
           hasPreviousPage: false
           hasNextPage: false
