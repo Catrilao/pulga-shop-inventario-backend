@@ -89,11 +89,6 @@ export class CreateProductoDto {
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
   descripcion?: string;
 
-  // @IsOptional()
-  // @IsString({ message: 'La foto_referencia debe ser un string' })
-  // @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
-  // foto_referencia?: string;
-
   @Transform(({ value }) => toNumber(value))
   @IsDefined({ message: 'Peso es requerido' })
   @IsNumber(
@@ -102,27 +97,27 @@ export class CreateProductoDto {
   )
   @IsPositive({ message: 'El peso debe ser mayor a 0' })
   @Max(999.9, { message: 'El peso no puede ser mayor a 999.9' })
-  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  @ErrorCode(ERROR_CODES.NUMERO_INVALIDO)
   peso: number;
 
   @Transform(({ value }) => toNumber(value))
   @IsDefined({ message: 'Alto es requerido' })
   @IsInt({ message: 'El alto debe ser un número entero' })
   @IsPositive({ message: 'El alto debe ser mayor a 0' })
-  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  @ErrorCode(ERROR_CODES.NUMERO_INVALIDO)
   alto: number;
 
   @Transform(({ value }) => toNumber(value))
   @IsDefined({ message: 'Largo es requerido' })
   @IsInt({ message: 'El largo debe ser un número entero' })
   @IsPositive({ message: 'El largo debe ser mayor a 0' })
-  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  @ErrorCode(ERROR_CODES.NUMERO_INVALIDO)
   largo: number;
 
   @Transform(({ value }) => toNumber(value))
   @IsDefined({ message: 'Ancho es requerido' })
   @IsInt({ message: 'El ancho debe ser un número entero' })
   @IsPositive({ message: 'El ancho debe ser mayor a 0' })
-  @ErrorCode(PRODUCTO_ERROR_CODES.PRECIO_INVALIDO)
+  @ErrorCode(ERROR_CODES.NUMERO_INVALIDO)
   ancho: number;
 }

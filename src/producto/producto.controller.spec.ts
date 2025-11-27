@@ -25,11 +25,15 @@ describe('ProductoController', () => {
     id_tienda: ID_TIENDA_TEST,
     nombre: 'Zapatillas',
     stock: 100,
-    precio: 40000,
+    costo: 40000,
     condicion: Condicion.NUEVO,
     marca: 'Nike',
     categoria: Categoria.CALZADO,
     descripcion: 'Zapatilla Nike mucho muy bonita',
+    peso: 0.7,
+    largo: 30,
+    alto: 7,
+    ancho: 30,
     ...overrides,
   });
   const MOCK_PRODUCTO = createMockProducto();
@@ -180,7 +184,7 @@ describe('ProductoController', () => {
 
   describe('update', () => {
     const mockUpdateProductoDto = {
-      nombre: 'Nuevo nombre',
+      costo: 20000,
     };
     const productoActualizado = {
       ...MOCK_PRODUCTO,
