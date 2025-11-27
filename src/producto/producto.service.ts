@@ -17,14 +17,12 @@ import { Prisma } from 'generated/prisma';
 import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
 import { generateSKU } from './utils/generate-sku';
 import { UpdateProductoDto } from './dto/update-producto.dto';
-import { RedisService } from 'src/redis/redis.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProductoService {
   constructor(
     private prisma: PrismaService,
-    private redis: RedisService,
     private cloudinary: CloudinaryService,
   ) {}
 
