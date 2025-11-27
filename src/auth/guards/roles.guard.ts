@@ -41,14 +41,15 @@ export class RolesGuard implements CanActivate {
     }
 
     const esVendedor = await this.verifyVendedor(user.id);
-    const esAdministrador = await this. verifyAdministrador(user.id);
+    const esAdministrador = await this.verifyAdministrador(user.id);
 
     if (!roles) {
       if (!esVendedor && !esAdministrador) {
-        throw new UnauthorizedException('El usuario no tiene los permisos suficientes');
+        throw new UnauthorizedException(
+          'El usuario no tiene los permisos suficientes',
+        );
       }
       return true;
-
     }
 
     if (roles.includes('vendedor') && esVendedor) {
@@ -60,7 +61,7 @@ export class RolesGuard implements CanActivate {
 
     throw new UnauthorizedException({
       message: 'El usuario no tiene el rol requerido',
-      code: ERROR_CODES.NO_AUTORIZADO
+      code: ERROR_CODES.NO_AUTORIZADO,
     });
   }
 
@@ -83,13 +84,14 @@ export class RolesGuard implements CanActivate {
       return esAdministrador;
     }
 
-  try {
+    try {
       const response = await lastValueFrom(
         this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`),
       );
 
       const roles: string[] = response.data;
-      const esAdministrador = Array.isArray(roles) && roles.includes('administrador');
+      const esAdministrador =
+        Array.isArray(roles) && roles.includes('administrador');
 
       await redisClient.set(cacheKey, esAdministrador.toString(), 'EX', 3600);
 

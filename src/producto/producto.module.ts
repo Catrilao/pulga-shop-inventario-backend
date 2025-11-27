@@ -9,7 +9,13 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [PrismaModule, AuthModule, RedisModule, LoggerModule, CloudinaryModule],
+  imports: [
+    PrismaModule,
+    AuthModule,
+    RedisModule,
+    LoggerModule,
+    CloudinaryModule,
+  ],
   controllers: [ProductoController],
   providers: [ProductoService, RolesGuard],
 })

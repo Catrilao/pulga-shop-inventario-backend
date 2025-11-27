@@ -28,7 +28,10 @@ export class ProductoService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  async create(createProductoDto: CreateProductoDto, imagen?: Express.Multer.File) {
+  async create(
+    createProductoDto: CreateProductoDto,
+    file?: Express.Multer.File,
+  ) {
     const { id_tienda, ...losDemas } = createProductoDto;
 
     const tiendaExiste = await this.prisma.tienda.findUnique({
@@ -60,8 +63,8 @@ export class ProductoService {
     }
 
     let foto_referencia: string | undefined = null;
-    if (imagen) {
-      foto_referencia = await this.cloudinary.uploadImage(imagen);
+    if (file) {
+      foto_referencia = await this.cloudinary.uploadImage(file);
     }
 
     return await this.prisma.producto.create({
@@ -120,10 +123,10 @@ export class ProductoService {
 
     const where: Prisma.ProductoWhereInput = {
       ...(queryDto.activo === 'true' || queryDto.activo === undefined
-        ? { activo:true }
+        ? { activo: true }
         : queryDto.activo === 'false'
-        ? { activo: false }
-        : {}),
+          ? { activo: false }
+          : {}),
       tienda: { id_vendedor },
       ...(queryDto.disponible !== undefined && {
         disponible: queryDto.disponible,
@@ -204,10 +207,7 @@ export class ProductoService {
       });
     }
 
-    if (
-      updateProductoDto.costo !== undefined &&
-      updateProductoDto.costo < 0
-    ) {
+    if (updateProductoDto.costo !== undefined && updateProductoDto.costo < 0) {
       throw new BadRequestException({
         message: 'El precio no puede ser negativo',
         error: PRODUCTO_ERROR_CODES.PRECIO_INVALIDO,
