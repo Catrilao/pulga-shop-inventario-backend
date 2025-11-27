@@ -245,14 +245,6 @@ export class ProductoService {
       });
     }
 
-    const productoEnReserva = await this.redis.isProductoInReserva(sku);
-    if (productoEnReserva) {
-      throw new BadRequestException({
-        message: 'El producto está en una reserva activa',
-        error: PRODUCTO_ERROR_CODES.PRODUCTO_EN_RESERVA,
-      });
-    }
-
     try {
       await this.prisma.producto.update({
         where: { sku },

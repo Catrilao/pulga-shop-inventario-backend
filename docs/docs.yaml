@@ -460,19 +460,10 @@ paths:
               example:
                 message: La cantidad debe ser mayor a cero
                 error: DATOS_ERRONEOS
-        '409':
-          description: Stock insuficiente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: No hay stock suficiente de este producto
-                error: STOCK_INSUFICIENTE
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
-  /reservas/{id_orden}/confirmar:
+  /reservas/{id_orden}:
     patch:
       tags: [Reservas]
       summary: Confirmar reserva de stock tras pago exitoso
@@ -488,34 +479,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReservaResponse'
-        '404':
-          description: Orden no encontrada o reserva expirada
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: La reserva con ID 123 no fue encontrada
-                error: RESERVA_NO_ENCONTRADA
-        '500':
-          $ref: '#/components/responses/ErrorServidor'
-
-  /reservas/{id_orden}/cancelar:
-    patch:
-      tags: [Reservas]
-      summary: Cancelar reserva de stock (pago fallido o timeout)
-      description: >
-        Cancela una reserva de stock asociada a una orden.
-      security: []
-      parameters:
-        - $ref: '#/components/parameters/idOrden'
-      responses:
-        '201':
-          description: Reserva cancelada, stock devuelto
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ReservaResponse'
+      '400':
+        description: Stock insuficiente
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+            example:
+              message: "Stock insuficiente o producto no disponible: T3-MOUSE-GAMER-GENERAL-NUEVO"
+              error: "STOCK_INSUFICIENTE"
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -856,13 +828,9 @@ components:
                 type: string
               cantidad_reservada:
                 type: integer
-        expira_en:
-          type: string
-          format: date-time
       required:
         - id_orden
         - items
-        - expira_en
 
     ReservaResponse:
       type: object

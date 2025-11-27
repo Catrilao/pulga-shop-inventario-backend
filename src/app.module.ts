@@ -8,6 +8,7 @@ import { RedisModule } from './redis/redis.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { HttpModule } from '@nestjs/axios';
+import { ReservaModule } from './reserva/reserva.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { HttpModule } from '@nestjs/axios';
     ProductoModule,
     RedisModule,
     HttpModule,
+    ReservaModule,
   ],
   controllers: [AppController],
   providers: [AppService],
