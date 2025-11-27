@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Categoria, Condicion } from 'generated/prisma';
+import { Decimal } from 'generated/prisma/runtime/library';
 
 export class GetProductoDto {
   @ApiProperty()
@@ -39,7 +40,7 @@ export class GetProductoDto {
   readonly foto_referencia: string;
 
   @ApiProperty()
-  readonly peso: number;
+  readonly peso: Decimal;
 
   @ApiProperty()
   readonly largo: number;
