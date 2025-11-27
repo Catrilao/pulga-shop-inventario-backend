@@ -3,35 +3,50 @@ import { Categoria, Condicion } from 'generated/prisma';
 
 export class GetProductoDto {
   @ApiProperty()
-  id_producto: number;
+  readonly id_producto: number;
 
   @ApiProperty()
-  id_tienda: number;
+  readonly id_tienda: number;
 
   @ApiProperty()
-  nombre: string;
+  readonly nombre: string;
 
   @ApiProperty()
-  stock: number;
+  readonly stock: number;
 
   @ApiProperty()
-  costo: number;
+  readonly costo: number;
 
   @ApiProperty()
-  sku: string;
+  readonly sku: string;
 
   @ApiProperty()
-  condicion: Condicion;
+  readonly condicion: Condicion;
 
   @ApiProperty()
-  fecha_creacion: Date;
+  readonly fecha_creacion: Date;
 
   @ApiProperty()
-  marca: string;
+  readonly marca: string;
 
   @ApiProperty()
-  categoria: Categoria;
+  readonly categoria: Categoria;
 
   @ApiProperty()
-  descripcion: string;
+  readonly descripcion: string;
+
+  @ApiProperty()
+  readonly foto_referencia: string;
+
+  @ApiProperty()
+  readonly peso: number;
+
+  @ApiProperty()
+  readonly largo: number;
+
+  @ApiProperty()
+  readonly alto: number;
+
+  @ApiProperty()
+  readonly ancho: number;
 }
