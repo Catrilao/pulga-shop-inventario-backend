@@ -20,16 +20,4 @@ export class CloudinaryService {
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }
-
-  async deleteImage(url: string): Promise<void> {
-    const publicId = this.extractPublicId(url);
-    if (publicId) {
-      await cloudinary.uploader.destroy(publicId);
-    }
-  }
-
-  private extractPublicId(url: string): string | null {
-    const match = url.match(/\/productos\/([^/]+)\.[^.]+$/);
-    return match ? `productos/${match[1]}` : null;
-  }
 }
