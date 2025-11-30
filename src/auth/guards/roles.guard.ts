@@ -13,6 +13,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { lastValueFrom } from 'rxjs';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { ERROR_CODES } from 'src/common/constants/error-codes';
+import { UserRoles } from 'src/common/interfaces/user.roles.interface';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -42,6 +43,12 @@ export class RolesGuard implements CanActivate {
 
     const esVendedor = await this.verifyVendedor(user.id);
     const esAdministrador = await this.verifyAdministrador(user.id);
+
+    const userRoles: UserRoles = {
+      esVendedor,
+      esAdministrador,
+    };
+    request.userRoles = userRoles;
 
     if (!roles) {
       if (!esVendedor && !esAdministrador) {
