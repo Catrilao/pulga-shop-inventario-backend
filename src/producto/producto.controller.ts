@@ -25,6 +25,8 @@ import { GetProductoDto } from './dto/get-producto.dto';
 import { QueryProductoDto } from './dto/query-producto.dto';
 import { Public } from 'src/auth/decorators/is-public.decorator';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { CurrentUserRoles } from 'src/auth/decorators/current-user-roles.decorator';
+import { UserRoles } from 'src/common/interfaces/user.roles.interface';
 
 @Controller('productos')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,7 +35,7 @@ export class ProductoController {
 
   @UseInterceptors(FileInterceptor('file'))
   @Post()
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   async create(
     @Body() createProductoDto: CreateProductoDto,
     @UploadedFile() file?: Express.Multer.File,
@@ -50,16 +52,17 @@ export class ProductoController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   async findAll(
     @CurrentUser('id') id_vendedor: number,
+    @CurrentUserRoles() roles: UserRoles,
     @Query() queryProductoDto: QueryProductoDto,
   ): Promise<PageDto<GetProductoDto>> {
-    return this.productoService.findAll(id_vendedor, queryProductoDto);
+    return this.productoService.findAll(id_vendedor, queryProductoDto, roles);
   }
 
   @Patch(':sku')
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   @HttpCode(HttpStatus.OK)
   async update(
     @CurrentUser('id') id_vendedor: number,
@@ -70,7 +73,7 @@ export class ProductoController {
   }
 
   @Delete(':sku')
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   @HttpCode(HttpStatus.OK)
   async delete(
     @CurrentUser('id') id_vendedor: number,

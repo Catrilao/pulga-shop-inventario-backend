@@ -18,6 +18,7 @@ import { PRODUCTO_ERROR_CODES } from './constants/error-codes';
 import { generateSKU } from './utils/generate-sku';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { UserRoles } from 'src/common/interfaces/user.roles.interface';
 
 @Injectable()
 export class ProductoService {
@@ -107,6 +108,7 @@ export class ProductoService {
   async findAll(
     id_vendedor: number,
     queryDto: QueryProductoDto,
+    roles: UserRoles,
   ): Promise<PageDto<GetProductoDto>> {
     if (
       queryDto.precio_max &&
@@ -125,7 +127,7 @@ export class ProductoService {
         : queryDto.activo === 'false'
           ? { activo: false }
           : {}),
-      tienda: { id_vendedor },
+      ...(roles.esAdministrador ? {} : { tienda: { id_vendedor } }),
       ...(queryDto.disponible !== undefined && {
         disponible: queryDto.disponible,
       }),

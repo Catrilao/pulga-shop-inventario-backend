@@ -11,6 +11,7 @@ import { PageDto } from 'src/common/dto/page.dto';
 import { GetTiendaDto } from './dto/get-tienda.dto';
 import { PageMetaDto } from 'src/common/dto/page-meta.dto';
 import { serializeTienda } from './utils/serialize-tienda';
+import { UserRoles } from 'src/common/interfaces/user.roles.interface';
 
 @Injectable()
 export class TiendaService {
@@ -35,7 +36,7 @@ export class TiendaService {
     });
     if (exists) {
       throw new ConflictException({
-        message: `Vendedor ya tiene una tienda con el nombre: "${createTiendaDto.nombre}"`,
+        message: `Tienda con el nombre: "${createTiendaDto.nombre}" ya existe`,
         error: TIENDA_ERROR_CODES.TIENDA_YA_EXISTE,
       });
     }
@@ -68,12 +69,17 @@ export class TiendaService {
   async findAll(
     pageOptionsDto: PageOptionsDto,
     id_vendedor: number,
+    roles: UserRoles,
   ): Promise<PageDto<GetTiendaDto>> {
+    const where = roles.esAdministrador
+      ? { activo: true }
+      : { id_vendedor, activo: true };
+
     const [tiendas, itemCount] = await Promise.all([
       this.prisma.tienda.findMany({
         skip: pageOptionsDto.skip,
         take: pageOptionsDto.take,
-        where: { id_vendedor, activo: true },
+        where,
         orderBy: { fecha_creacion: pageOptionsDto.order },
       }),
       this.prisma.tienda.count(),

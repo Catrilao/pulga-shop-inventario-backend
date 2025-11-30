@@ -19,6 +19,8 @@ import { Public } from 'src/auth/decorators/is-public.decorator';
 import { PageOptionsDto } from 'src/common/dto/page-options.dto';
 import { PageDto } from 'src/common/dto/page.dto';
 import { GetTiendaDto } from './dto/get-tienda.dto';
+import { CurrentUserRoles } from 'src/auth/decorators/current-user-roles.decorator';
+import { UserRoles } from 'src/common/interfaces/user.roles.interface';
 
 @Controller('tiendas')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,7 +28,7 @@ export class TiendaController {
   constructor(private readonly tiendaService: TiendaService) {}
 
   @Post()
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   async create(
     @Body() createTiendaDto: CreateTiendaDto,
     @CurrentUser('id') id_vendedor: number,
@@ -43,11 +45,12 @@ export class TiendaController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @Roles('vendedor')
+  @Roles('vendedor', 'administrador')
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
     @CurrentUser('id') id_vendedor: number,
+    @CurrentUserRoles() roles: UserRoles,
   ): Promise<PageDto<GetTiendaDto>> {
-    return this.tiendaService.findAll(pageOptionsDto, id_vendedor);
+    return this.tiendaService.findAll(pageOptionsDto, id_vendedor, roles);
   }
 }
