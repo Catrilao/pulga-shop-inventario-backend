@@ -1,0 +1,77 @@
+Microservicio de Búsqueda y Descubrimiento (Grupo 3)
+
+Endpoints implementados y endpoints recomendados.
+
+Servicios y puertos (Nombre_Servicio:N°_puertoActual):
+- mongo:27017
+- mongo-express:8081
+- backend:3000
+- frontend(Vite) : 5173  (solo si se ejecuta localmente con Vite; no está en docker-compose)
+
+
+Endpoints actuales (detectados / confirmados):
+
+1) GET /api-docs  
+   - Propósito: Swagger UI / documentación del API.  
+   - Ejemplo:
+     curl -X GET "http://localhost:3000/api-docs"
+
+2) GET /api/search/products  
+   - Propósito: Buscar productos con filtros (query params típicos: `busqueda`, `precio`, `categoria`, `ubicacion`, `condicion`, `page`, `limit`).  
+   - Ejemplo:
+     curl -G "http://localhost:3000/api/search/products" --data-urlencode "busqueda=zapatillas" --data-urlencode "page=1" -H "Authorization: Bearer <token>"
+
+3) GET /api/search/products/all  
+   - Propósito: Obtener la lista completa de productos (lectura desde `src/data/productos.json`).  
+   - Ejemplo:
+     curl -X GET "http://localhost:3000/api/search/products/all" -H "Authorization: Bearer <token>"
+
+4) GET /api/search/suggestions?texto={texto}  
+   - Propósito: Sugerencias / autocompletado. Combina historial guardado en Mongo y coincidencias locales.  
+   - Ejemplo:
+     curl -G "http://localhost:3000/api/search/suggestions" --data-urlencode "texto=lap" -H "Authorization: Bearer <token>"
+
+5) GET /api/search/history  
+   - Propósito: Obtener historial de búsquedas del usuario (consulta en Mongo).  
+   - Ejemplo:
+     curl -X GET "http://localhost:3000/api/search/history" -H "Authorization: Bearer <token>"
+
+6) POST /api/search/history  
+   - Propósito: Guardar una búsqueda en historial (payload ejemplo: `{ "busqueda": "zapatos", "filtros": {...} }`).  
+   - Ejemplo:
+     curl -X POST "http://localhost:3000/api/search/history" -H "Content-Type: application/json" -d '{"busqueda":"zapatos"}' -H "Authorization: Bearer <token>"
+
+Endpoints anticipados / recomendados:
+Recomendados para completar funcionalidades y monitorización:
+
+- GET /api/search/:id  
+  - Propósito: Detalle de un producto por id.
+
+- POST /api/search/click  
+  - Propósito: Registrar clicks/engagement (payload: `{ resultId, userId?, source? }`) — usar modelo Click (`src/models/Click.ts`) y servicio de persistencia.
+
+- GET /api/search/stats  
+  - Propósito: Estadísticas agregadas (top queries, top clicks, CTR).
+
+- POST /api/search/index  
+  - Propósito: Reindexar o subir documentos (endpoint protegido para admin).
+
+- GET /health o GET /api/health  
+  - Propósito: Liveness/readiness para orquestadores (Docker/K8s). Recomiendo implementar para healthchecks.
+
+- Endpoint de autenticación (login/refresh) (si la API debe emitir JWTs).
+
+Archivos clave y ubicación:
+- server principal: `backend/src/server.ts`
+- rutas de búsqueda: `backend/src/routes/searchRoutes.ts`
+- controladores: `backend/src/controllers/searchController.ts`
+- servicios: `backend/src/services/searchService.ts`, `backend/src/services/db.ts`
+- modelos: `backend/src/models/Search.ts`, `backend/src/models/Click.ts`
+- middlewares: `backend/src/middleware/*`
+- Swagger: `backend/src/swagger/*`
+- Scripts de BD init/seed: `backend/src/BD/init/*`
+
+Propuesta de Reunion:
+Dia: viernes 14 de noviembre
+Hora: 18:00
+

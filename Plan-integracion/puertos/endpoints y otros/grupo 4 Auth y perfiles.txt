@@ -1,0 +1,8 @@
+El grupo 4 tenemos integradas y funcionando:
+Registro de cuenta (HU1)
+Recuperación de contraseña (HU4)
+
+En progreso:
+Configurar perfil (HU 2)
+Registro con Captcha (HU 3)
+puertos 3000 al 3010

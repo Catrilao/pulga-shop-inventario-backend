@@ -1,0 +1,147 @@
+
+services:
+
+  #--- ALL FRONTENDS --- #
+
+  service_minimum: #BORREN ESTE SERVICIO Y LOS QUE SE ASEMEJEN; SON SOLO PARA EXPLICAR#
+    build: ./service_minimum
+    <environment:
+      - env_var_name = env_value
+      - ...
+    >
+    <env_file:
+      ./<backend_minimum>/.env
+    >
+    <depends_on: [db_sql|db_mongodb]>
+    ports:
+      - "y1:y1"
+    networks: [appnet]
+
+  frontend_analitica:
+    build: ./frontend_analitica
+    ports:
+      - "x1:80"
+    networks: [appnet]
+
+  frontend_publicaciones:
+    build: ./frontend_publicaciones
+    ports:
+      - "x2:80"
+    networks: [appnet]
+
+  frontend_bsq&reconocimiento:
+    build: ./frontend_bsq&reconocimiento
+    ports:
+      - "x3:80"
+    networks: [appnet]
+
+  frontend_auth&perfiles:
+    build: ./frontend_auth&perfile
+    ports:
+      - "x4:80"
+    networks: [appnet]
+
+  frontend_carro&ordenes:
+    build: ./frontend_carro&ordenes
+    ports:
+      - "x5:80"
+    networks: [appnet]
+
+  frontend_intfz&pagos:
+    build: ./frontend_intfz&pagos
+    ports:
+      - "x6:80"
+    networks: [appnet]
+
+  frontend_ven&inventario:
+    build: ./frontend_ven&inventario
+    ports:
+      - "x7:80"
+    networks: [appnet]
+
+  frontend_notificaciones:
+    build: ./frontend_notificaciones
+    ports:
+      - "x8:80"
+    networks: [appnet]
+
+  frontend_msjs&disputas:
+    build: ./frontend_msjs&disputas
+    ports:
+      - "x9:80"
+    networks: [appnet]
+
+  frontend_rvws&reputacion:
+    build: ./frontend_rvws&reputacion
+    ports:
+      - "x10:80"
+    networks: [appnet]
+
+  frontend_envios:
+    build: ./frontend_envios
+    ports:
+      - "x11:80"
+    networks: [appnet]
+
+  # --- BACKENDS TEMPLATES --- #
+
+  backend_sql_serverApproach:
+    build: ./backend_sql_serverApproach
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - DB_HOST=db_sql
+    depends_on: [db_sql]
+    ports:
+      - "y2a:y2a"
+    networks: [appnet]
+
+  backend_mongo_mainApproach:
+    build: ./backend_mongo_mainApproach
+    env_file:
+      - ./backend_mongo_mainApproach/.env
+    depends_on: [db_mongodb]
+    ports:
+      - "y2b:y2b"
+    networks: [appnet]
+
+  db_sql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - db_data_sql:/var/lib/mysql
+      - ./backend_sql_serverApproach/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "16010:16010"
+
+    networks: [appnet]
+
+  # --- DATABASES INFO --- #
+
+  db_mongodb:
+    image: mongo:latest
+    container_name: db_mongodb
+    volumes:
+      - mongodb-data:/data/db
+    ports:
+      - "5173:5173"
+    networks: [appnet]
+
+  # --- NGINX INFO --- #
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [frontend_analitica, frontend_publicaciones,...] <= EDITAR SEGUN PRUEBA
+    networks: [appnet]
+
+networks:
+  appnet:
+    driver: bridge
+
+volumes:
+  db_data_sql:
+  mongodb-data:

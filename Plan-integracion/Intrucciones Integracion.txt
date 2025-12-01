@@ -1,0 +1,41 @@
+
+Para prueba unitaria de integracion:
+
+1. Editar el dockerfile de backend_template a sus necesidades
+   => Ajuste la version de node si hace falta; Puede ser 18 o 20.
+   => Debe quedar sin formato; No .txt
+
+2. Editar nginx.conf a sus necesidades
+   => Probar 1ero con estrutura del default, sino funciona intentar con advance u otra configuracion.
+   => Este archivo puede se motivo de errores si no esta correctamente editado.
+   => Debe quedar en formato .config.
+
+3. Editar docker-compose a sus necesidades
+   => Este archivo puede se motivo de errores si no esta correctamente editado.
+   => Debe quedar en formato .config.
+
+4. Subir proyecto propio a github (OBLIGATORIO)
+   => Deben incluir sus dockerfiles en sus respectivos directorios
+  
+5. Abrir Docker-Desktop y dejarlo abierto
+   => En algunos casos puede ser requerido que detenga la ejecucion de wsl
+   => Si usan un procesador AMD, es posible que requiera hacer una configuracion en su motherboard.
+
+6. Crear un directorio exlusivo para la integracion
+   => Puede usar el template adjtuno como referencia
+   => Recordar que nginx.conf y el docker-compose.yml deben quedar juntos en el directorio donde se encuentren todos los proyectos.
+
+7. En ese directorio:
+   => Bajar proyectos de interes de github
+   => Ponga el nginx.conf y el docker-compose.yml, verifique que estan bien editados
+   => Ejecute el comando de docker compose.
+
+8. Esperar, puede demorar hasta una hora la 1era vez.
+   => Prestar atencion a mensajes de la consola si esta buscando corregir un error.
+
+10. Una vez finalize, deje la consola abierta y pruebe abrir un servicio en su browser con su respectivo endpoint.
+
+11. Notas:
+    => Las bases de datos inician vacias, pueden usar postman para llenar a lo raw.
+    => Si percibe errores de funcionamento que no dejan logs en docker, revise el panel de desarrollador en el browser.
+    => Checkear Troubleshooting si percibe algun problema

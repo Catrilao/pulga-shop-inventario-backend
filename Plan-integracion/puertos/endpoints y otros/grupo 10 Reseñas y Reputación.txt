@@ -1,0 +1,21 @@
+Utilizaremos puertos 3500 a 3510; 
+
+Reseñas de producto
+
+Listar reseñas de un producto (público):
+GET /api/v1/productos/{productoId}/reseñas
+
+Crear una reseña (autenticado):
+POST /api/v1/productos/{productoId}/reseñas
+Body: { id_comprador, id_vendedor, calificacion, comentario }
+
+Puntuaciones de vendedor
+
+Listar puntuaciones de un vendedor (público):
+GET /api/v1/vendedores/{vendedorId}/puntuaciones
+
+Filtrar por puntuación:
+GET /api/v1/vendedores/{vendedorId}/puntuaciones?puntuacion=5
+
+Agregar (promedio, conteo):
+GET /api/v1/vendedores/{vendedorId}/rating // { promedio, conteo }

@@ -1,0 +1,14 @@
+Deterner wsl: 
+wsl --shutdown
+
+Iniciar compose:
+docker-compose up
+
+Checkear logs de imagenes docker para buscar errores:
+docker-compose logs
+
+Reiniciar imagenes:
+docker-compose build
+
+Limpiar cache Docker (containers,images etc) por si falla compose:
+docker system prune
