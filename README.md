@@ -119,7 +119,7 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | Atributo | Tipo | Nulo | Clave | Valor por defecto |Descripción |
 |----------|------|------|-------|-------------------|------------|
 | `id_tienda` | INT AUTO_INCREMENT | NO | PK | - | Identificador único de la tienda |
-| `id_vendedor` | BIGINT | NO | - | - | Referencia al vendedor dueño (módulo externo) |
+| `id_vendedor` | VARCHAR(24) | NO | - | - | Referencia al vendedor dueño (módulo externo) |
 | `nombre` | VARCHAR(100) | NO | - | - | Nombre de la tienda |
 | `id_ciudad` | INT | NO | FK | - | Clave foranea para la ciudad |
 | `direccion` | VARCHAR(200) | NO | - | - | Dirección física de la tienda |
@@ -145,6 +145,11 @@ El sistema utiliza una arquitectura de base de datos híbrida:
 | `descripcion` | TEXT | SI | - | 'Sin descripción' | Descripción detallada del producto |
 | `activo` | BOOLEAN | SI | - | TRUE | Indica la disponibilidad del producto. |
 | `foto_referencia` | TEXT | SI | - | - | URL de la imagen de referencia del producto, almacenada en Cloudinary. |
+| `peso` | DECIMAL(4,1) | SI | - | 0.0 | Peso del producto en kg. |
+| `alto` | INT | SI | - | 0 | Alto del producto en cm. |
+| `largo` | INT | SI | - | 0 | Largo del producto en cm. |
+| `ancho` | INT | SI | - | 0 | Ancho del producto en cm. |
+
 
 #### Base de Datos en Memoria (Redis)
 
