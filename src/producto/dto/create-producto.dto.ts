@@ -14,7 +14,7 @@ import { ErrorCode } from 'src/common/decorators/error-code.decorator';
 import { PRODUCTO_ERROR_CODES } from '../constants/error-codes';
 import { TIENDA_ERROR_CODES } from 'src/tienda/constants/error-codes';
 import { ERROR_CODES } from 'src/common/constants/error-codes';
-import { Categoria, Condicion } from 'generated/prisma';
+import { categoria_enum, condicion_enum } from 'generated/prisma';
 
 const toNumber = (value: unknown): number | undefined => {
   if (value === undefined || value === null) return undefined;
@@ -59,11 +59,11 @@ export class CreateProductoDto {
 
   @IsOptional()
   @Transform(({ value }) => value?.trim().toUpperCase())
-  @IsEnum(Condicion, {
-    message: `La condicion debe ser una de las siguientes opciones: [${Object.values(Condicion).join(', ')}]`,
+  @IsEnum(condicion_enum, {
+    message: `La condicion debe ser una de las siguientes opciones: [${Object.values(condicion_enum).join(', ')}]`,
   })
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
-  condicion?: Condicion = Condicion.NUEVO;
+  condicion?: condicion_enum = condicion_enum.NUEVO;
 
   @IsOptional()
   @IsString({ message: 'La marca debe ser un string' })
@@ -74,11 +74,11 @@ export class CreateProductoDto {
 
   @IsOptional()
   @Transform(({ value }) => value?.trim().toUpperCase())
-  @IsEnum(Categoria, {
-    message: `La categoria debe ser una de las siguientes opciones: [${Object.values(Categoria).join(', ')}]`,
+  @IsEnum(categoria_enum, {
+    message: `La categoria debe ser una de las siguientes opciones: [${Object.values(categoria_enum).join(', ')}]`,
   })
   @ErrorCode(ERROR_CODES.NOMBRE_INVALIDO)
-  categoria?: Categoria = Categoria.GENERAL;
+  categoria?: categoria_enum = categoria_enum.GENERAL;
 
   @IsOptional()
   @IsString({ message: 'La descripcion debe ser un string' })

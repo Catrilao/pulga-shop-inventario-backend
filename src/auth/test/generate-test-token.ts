@@ -5,18 +5,23 @@ const { hideBin } = require('yargs/helpers');
 const argv = yargs(hideBin(process.argv))
   .option('role', {
     type: 'string',
-    default: '',
-    choices: ['', 'vendedor', 'admin', 'usuario'],
+    default: 'vendedor',
+    choices: ['', 'vendedor', 'administrador', 'usuario'],
+  })
+  .option('vendedor', {
+    type: 'string',
+    default: 'VEND_001',
+    description: 'ID del vendedor (sub en el token)',
   })
   .help()
   .parseSync();
 
 const jwtService = new JwtService({
-  secret: 'EstoEsUnSecretoSuperSeguro',
+  secret: process.env.JWT_SECRET || 'EstoEsUnSecretoSuperSeguro',
 });
 
 const payload = {
-  sub: 123,
+  sub: argv.vendedor,
   email: 'correo@correo.com',
   role: argv.role,
 };
