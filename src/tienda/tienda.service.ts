@@ -82,7 +82,7 @@ export class TiendaService {
         where,
         orderBy: { fecha_creacion: pageOptionsDto.order },
       }),
-      this.prisma.tienda.count(),
+      this.prisma.tienda.count({ where }),
     ]);
 
     const tiendasDto: GetTiendaDto[] = tiendas.map((tienda) =>
