@@ -19,7 +19,7 @@ export class TiendaService {
 
   async create(
     createTiendaDto: CreateTiendaDto,
-    id_vendedor: number,
+    id_vendedor: string,
   ): Promise<GetTiendaDto> {
     const ciudadExiste = await this.prisma.ciudad.findUnique({
       where: { id_ciudad: createTiendaDto.id_ciudad },
@@ -68,7 +68,7 @@ export class TiendaService {
 
   async findAll(
     pageOptionsDto: PageOptionsDto,
-    id_vendedor: number,
+    id_vendedor: string,
     roles: UserRoles,
   ): Promise<PageDto<GetTiendaDto>> {
     const where = roles.esAdministrador

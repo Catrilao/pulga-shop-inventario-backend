@@ -54,7 +54,7 @@ export class ProductoController {
   @HttpCode(HttpStatus.OK)
   @Roles('vendedor', 'administrador')
   async findAll(
-    @CurrentUser('id') id_vendedor: number,
+    @CurrentUser('id') id_vendedor: string,
     @CurrentUserRoles() roles: UserRoles,
     @Query() queryProductoDto: QueryProductoDto,
   ): Promise<PageDto<GetProductoDto>> {
@@ -65,7 +65,7 @@ export class ProductoController {
   @Roles('vendedor', 'administrador')
   @HttpCode(HttpStatus.OK)
   async update(
-    @CurrentUser('id') id_vendedor: number,
+    @CurrentUser('id') id_vendedor: string,
     @Param('sku') sku: string,
     @Body() updateProductoDto: UpdateProductoDto,
   ): Promise<GetProductoDto> {
@@ -76,7 +76,7 @@ export class ProductoController {
   @Roles('vendedor', 'administrador')
   @HttpCode(HttpStatus.OK)
   async delete(
-    @CurrentUser('id') id_vendedor: number,
+    @CurrentUser('id') id_vendedor: string,
     @Param('sku') sku: string,
   ): Promise<void> {
     await this.productoService.delete(id_vendedor, sku);

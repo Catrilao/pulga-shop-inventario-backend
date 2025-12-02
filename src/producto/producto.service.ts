@@ -106,7 +106,7 @@ export class ProductoService {
   }
 
   async findAll(
-    id_vendedor: number,
+    id_vendedor: string,
     queryDto: QueryProductoDto,
     roles: UserRoles,
   ): Promise<PageDto<GetProductoDto>> {
@@ -175,7 +175,7 @@ export class ProductoService {
   }
 
   async update(
-    id_vendedor: number,
+    id_vendedor: string,
     sku: string,
     updateProductoDto: UpdateProductoDto,
   ) {
@@ -193,7 +193,7 @@ export class ProductoService {
       });
     }
 
-    if (producto.tienda.id_vendedor !== BigInt(id_vendedor)) {
+    if (producto.tienda.id_vendedor !== id_vendedor) {
       throw new BadRequestException({
         message: 'No tienes permisos para actualizar este producto',
         error: ERROR_CODES.NO_AUTORIZADO,
@@ -225,7 +225,7 @@ export class ProductoService {
     return updatedProducto;
   }
 
-  async delete(id_vendedor: number, sku: string): Promise<void> {
+  async delete(id_vendedor: string, sku: string): Promise<void> {
     const producto = await this.prisma.producto.findUnique({
       where: { sku, activo: true },
       include: { tienda: true },
@@ -238,7 +238,7 @@ export class ProductoService {
       });
     }
 
-    if (producto.tienda.id_vendedor !== BigInt(id_vendedor)) {
+    if (producto.tienda.id_vendedor !== id_vendedor) {
       throw new BadRequestException({
         message: 'No tienes permisos para eliminar este producto',
         error: ERROR_CODES.NO_AUTORIZADO,

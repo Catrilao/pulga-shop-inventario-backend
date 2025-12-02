@@ -13,7 +13,6 @@ export function serializeTienda(tienda: {
 }): GetTiendaDto {
   return {
     ...tienda,
-    
     fecha_creacion: tienda.fecha_creacion.toISOString(),
   };
 }

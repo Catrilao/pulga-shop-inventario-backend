@@ -31,7 +31,7 @@ export class TiendaController {
   @Roles('vendedor', 'administrador')
   async create(
     @Body() createTiendaDto: CreateTiendaDto,
-    @CurrentUser('id') id_vendedor: number,
+    @CurrentUser('id') id_vendedor: string,
   ) {
     return await this.tiendaService.create(createTiendaDto, id_vendedor);
   }
@@ -48,7 +48,7 @@ export class TiendaController {
   @Roles('vendedor', 'administrador')
   async findAll(
     @Query() pageOptionsDto: PageOptionsDto,
-    @CurrentUser('id') id_vendedor: number,
+    @CurrentUser('id') id_vendedor: string,
     @CurrentUserRoles() roles: UserRoles,
   ): Promise<PageDto<GetTiendaDto>> {
     return this.tiendaService.findAll(pageOptionsDto, id_vendedor, roles);
