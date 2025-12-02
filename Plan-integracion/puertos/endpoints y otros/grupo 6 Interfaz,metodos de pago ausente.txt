@@ -1,7 +1,0 @@
-- Lista de sus servicios con sus puertos; 
-LocalHost: 6666 y 6060
-
-- Lista de endpoints actuales y anticipados;
-Todavia NO tenemos la lista entera, se vera durante la reunion o despues de nuestra entrega 2 (19 noviembre)
-- Horario de disposición para reunión de viernes a domingo:
-Los Viernes en horario de almuerzo (1:30 pm)

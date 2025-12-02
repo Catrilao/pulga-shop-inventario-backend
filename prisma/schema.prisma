@@ -21,7 +21,7 @@ model Ciudad {
 
 model Tienda {
     id_tienda      Int        @id @default(autoincrement())
-    id_vendedor    BigInt
+    id_vendedor    String     @db.VarChar(24)
     nombre         String     @db.VarChar(100)
     id_ciudad      Int
     direccion      String     @db.VarChar(200)

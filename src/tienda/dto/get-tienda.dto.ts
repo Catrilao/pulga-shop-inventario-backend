@@ -4,8 +4,8 @@ export class GetTiendaDto {
   @ApiProperty({ example: 1 })
   id_tienda: number;
 
-  @ApiProperty({ example: 123456789 })
-  id_vendedor: number;
+  @ApiProperty({ example: "holaMAicol" })
+  id_vendedor: string;
 
   @ApiProperty({ example: 'Tienda Ejemplo' })
   nombre: string;

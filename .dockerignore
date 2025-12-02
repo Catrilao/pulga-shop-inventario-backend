@@ -1,6 +1,16 @@
 node_modules
 dist
 generated
+.env
+.env.local
+.env.*
+.git
+coverage
+npm-debug.log
+Dockerfile
+docker-compose.ymlnode_modules
+dist
+generated
 coverage
 .env
 .git

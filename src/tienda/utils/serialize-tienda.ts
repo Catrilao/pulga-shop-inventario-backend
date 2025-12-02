@@ -2,7 +2,7 @@ import { GetTiendaDto } from '../dto/get-tienda.dto';
 
 export function serializeTienda(tienda: {
   id_tienda: number;
-  id_vendedor: bigint;
+  id_vendedor: string;
   nombre: string;
   id_ciudad: number;
   direccion: string;
@@ -13,7 +13,7 @@ export function serializeTienda(tienda: {
 }): GetTiendaDto {
   return {
     ...tienda,
-    id_vendedor: Number(tienda.id_vendedor),
+    
     fecha_creacion: tienda.fecha_creacion.toISOString(),
   };
 }
