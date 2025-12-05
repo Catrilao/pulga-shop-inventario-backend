@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Categoria, Condicion } from 'generated/prisma';
+import { categoria_enum, condicion_enum } from 'generated/prisma';
 import { Decimal } from 'generated/prisma/runtime/library';
 
 export class GetProductoDto {
@@ -22,7 +22,7 @@ export class GetProductoDto {
   readonly sku: string;
 
   @ApiProperty()
-  readonly condicion: Condicion;
+  readonly condicion: condicion_enum;
 
   @ApiProperty()
   readonly fecha_creacion: Date;
@@ -31,7 +31,7 @@ export class GetProductoDto {
   readonly marca: string;
 
   @ApiProperty()
-  readonly categoria: Categoria;
+  readonly categoria: categoria_enum;
 
   @ApiProperty()
   readonly descripcion: string;
