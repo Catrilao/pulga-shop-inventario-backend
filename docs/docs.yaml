@@ -34,7 +34,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/ProductoPost'
       responses:
@@ -55,9 +55,9 @@ paths:
                   value:
                     message: El stock debe ser al menos 1
                     error: STOCK_INVALIDO
-                precioInvalido:
+                costoInvalido:
                   value:
-                    message: El precio debe ser al menos 1
+                    message: El costo debe ser al menos 1
                     error: PRECIO_INVALIDO
         '404':
           description: Tienda no existe
@@ -65,12 +65,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                message: La tienda no existe
+                error: TIENDA_NO_EXISTE
         '409':
           description: Producto con SKU ya existe
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                message: "Producto con SKU: 'T3-MOUSE-GAMER-GENERAL-NUEVO' ya existe"
+                error: PRODUCTO_YA_EXISTE
         '401':
           description: No autorizado
           content:
@@ -87,8 +93,8 @@ paths:
       tags: [Productos]
       summary: Listar productos del vendedor
       description: >
-        Devuelve productos activos pertenecientes a las tiendas del vendedor autenticado. <br>
-        Soporta paginación y filtros por tienda, rango de precio y disponibilidad.
+        Devuelve productos pertenecientes a las tiendas del vendedor autenticado. <br>
+        Soporta paginación y filtros por tienda, rango de costo y estado activo.
       security:
         - bearerAuth: []
       parameters:
@@ -98,24 +104,32 @@ paths:
           schema:
             type: integer
           description: Filtra por ID de tienda
-        - name: precio_min
+        - name: costo_min
           in: query
           required: false
           schema:
             type: number
-          description: Precio mínimo (gte)
-        - name: precio_max
+          description: Costo mínimo (gte)
+        - name: costo_max
           in: query
           required: false
           schema:
             type: number
-          description: Precio máximo (lte)
-        - name: disponible
+          description: Costo máximo (lte)
+        - name: activo
           in: query
           required: false
           schema:
-            type: boolean
-          description: Filtra por disponibilidad del producto
+            type: string
+            enum: [true, false, all]
+            default: true
+          description: Filtra por estado activo
+        - name: sku
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtra por SKU
         - name: page
           in: query
           required: false
@@ -149,14 +163,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProductosPaginados'
         '400':
-          description: Rango inválido (precio_min > precio_max)
+          description: Rango inválido (costo_min > costo_max)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                message: El precio mínimo no puede ser mayor que el precio máximo
-                error: DATOS_ERRONEOS
+                message: El costo mínimo no puede ser mayor que el costo máximo
+                error: PRECIO_INVALIDO
         '401':
           description: No autorizado
           content:
@@ -166,16 +180,6 @@ paths:
               example:
                 message: Sesión no iniciada
                 error: NO_AUTORIZADO
-        '409':
-          descripcion: Conflicto
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                message: Producto con SKU 'P1-POL-ADI-ROP-NUE' no encontrado
-                code: ERROR_CODES.NO_ENCONTRADO,
-
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -203,7 +207,7 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 message: Producto con SKU 'ABC' no encontrado
-                error: NO_ENCONTRADO
+                code: NO_ENCONTRADO
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -212,7 +216,7 @@ paths:
       summary: Actualizar producto
       description: >
         Actualiza campos del producto. Todos los campos son opcionales, se requiere al menos uno. <br>
-        Validaciones de no negativo para stock y precio. <br>
+        Validaciones de no negativo para stock y costo. <br>
         Solo el vendedor dueño del producto puede actualizarlo.
       security:
         - bearerAuth: []
@@ -242,10 +246,14 @@ paths:
                   value:
                     message: El stock no puede ser negativo
                     error: STOCK_INVALIDO
-                precioNegativo:
+                costoNegativo:
                   value:
-                    message: El precio no puede ser negativo
+                    message: El costo no puede ser negativo
                     error: PRECIO_INVALIDO
+                noAutorizado:
+                  value:
+                    message: No tienes permisos para actualizar este producto
+                    error: NO_AUTORIZADO
         '404':
           description: Producto no existe
           content:
@@ -262,7 +270,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                message: No tienes permisos para actualizar este producto
+                message: Sesión no iniciada
                 error: NO_AUTORIZADO
         '500':
           $ref: '#/components/responses/ErrorServidor'
@@ -271,7 +279,7 @@ paths:
       tags: [Productos]
       summary: Eliminar producto
       description: >
-        Marca el producto como inactivo si el vendedor es dueño y no está en una reserva activa.
+        Marca el producto como inactivo si el vendedor es dueño.
       security:
         - bearerAuth: []
       parameters:
@@ -285,12 +293,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                message: El producto con SKU ABC no existe
+                error: NO_ENCONTRADO
         '400':
-          description: No autorizado o producto en reserva activa
+          description: No autorizado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                message: No tienes permisos para eliminar este producto
+                error: NO_AUTORIZADO
         '401':
           description: No autorizado
           content:
@@ -298,8 +312,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                message: El producto está en una reserva activa
-                error: PRODUCTO_EN_RESERVA
+                message: Sesión no iniciada
+                error: NO_AUTORIZADO
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -392,7 +406,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                message: "Vendedor ya tiene una tienda con el nombre: 'X'"
+                message: "Tienda con el nombre: \"CompuShop\" ya existe"
                 error: TIENDA_YA_EXISTE
         '401':
           description: No autorizado
@@ -401,7 +415,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
               example:
-                message: No tienes permisos para crear una tienda
+                message: Sesión no iniciada
                 error: NO_AUTORIZADO
         '500':
           $ref: '#/components/responses/ErrorServidor'
@@ -428,6 +442,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                message: Tienda no existe
+                error: TIENDA_NO_ENCONTRADA
         '500':
           $ref: '#/components/responses/ErrorServidor'
 
@@ -479,15 +496,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ReservaResponse'
-      '400':
-        description: Stock insuficiente
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-            example:
-              message: "Stock insuficiente o producto no disponible: T3-MOUSE-GAMER-GENERAL-NUEVO"
-              error: "STOCK_INSUFICIENTE"
+        '400':
+          description: Stock insuficiente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: "Stock insuficiente o producto no disponible: T3-MOUSE-GAMER-GENERAL-NUEVO"
+                error: "STOCK_INSUFICIENTE"
         '404':
           description: Orden no encontrada o reserva expirada
           content:
@@ -513,7 +530,7 @@ components:
           type: string
         stock:
           type: integer
-        precio:
+        costo:
           type: integer
         sku:
           type: string
@@ -532,22 +549,36 @@ components:
           type: string
         activo:
           type: boolean
+        foto_referencia:
+          type: string
+          nullable: true
+        peso:
+          type: number
+        alto:
+          type: integer
+        largo:
+          type: integer
+        ancho:
+          type: integer
       required:
         - id_producto
         - id_tienda
         - nombre
         - stock
-        - precio
+        - costo
         - sku
         - condicion
         - fecha_creacion
-        - activo
+        - peso
+        - alto
+        - largo
+        - ancho
       example:
         id_producto: 10
         id_tienda: 3
         nombre: "Mouse Gamer"
         stock: 25
-        precio: 19990
+        costo: 19990
         sku: "T3-MOUSE-GAMER-GENERAL-NUEVO"
         condicion: NUEVO
         fecha_creacion: "2025-01-10T12:00:00Z"
@@ -555,6 +586,11 @@ components:
         categoria: "GENERAL"
         descripcion: "Sin descripcion"
         activo: true
+        foto_referencia: "https://cloudinary.com/image.jpg"
+        peso: 0.5
+        alto: 5
+        largo: 10
+        ancho: 8
 
     ProductoPost:
       type: object
@@ -569,7 +605,7 @@ components:
         stock:
           type: integer
           minimum: 1
-        precio:
+        costo:
           type: integer
           minimum: 1
         condicion:
@@ -580,7 +616,6 @@ components:
           type: string
           minLength: 3
           maxLength: 50
-          default: "Genérica"
         categoria:
           type: string
           enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
@@ -589,57 +624,77 @@ components:
           type: string
           minLength: 3
           maxLength: 1000
-          default: "Sin descripcion"
+        peso:
+          type: number
+          minimum: 0.1
+          maximum: 999.9
+        alto:
+          type: integer
+          minimum: 1
+        largo:
+          type: integer
+          minimum: 1
+        ancho:
+          type: integer
+          minimum: 1
+        file:
+          type: string
+          format: binary
+          description: Imagen del producto (opcional)
       required:
         - id_tienda
         - nombre
         - stock
-        - precio
+        - costo
+        - peso
+        - alto
+        - largo
+        - ancho
       example:
         id_tienda: 3
         nombre: "Mouse Gamer"
         stock: 25
-        precio: 19990
+        costo: 19990
         condicion: NUEVO
         marca: "Genérica"
         categoria: GENERAL
         descripcion: "Sin descripcion"
+        peso: 0.5
+        alto: 5
+        largo: 10
+        ancho: 8
 
     ProductoPatch:
       type: object
       minProperties: 1
       properties:
-        id_tienda:
-          type: integer
-          minimum: 1
-        nombre:
-          type: string
-          minLength: 3
-          maxLength: 100
         stock:
           type: integer
           minimum: 0
-        precio:
+        costo:
           type: integer
           minimum: 0
-        condicion:
-          type: string
-          enum: [NUEVO, USADO, REACONDICIONADO]
-        marca:
-          type: string
-          minLength: 3
-          maxLength: 50
-        categoria:
-          type: string
-          enum: [ELECTRÓNICA, ROPA, CALZADO, HOGAR, JUGUETES, DEPORTES, LIBROS, ALIMENTOS, BELLEZA, OFICINA, AUTOMOTRIZ, MASCOTAS, GENERAL]
         descripcion:
           type: string
           minLength: 3
           maxLength: 1000
+        peso:
+          type: number
+          minimum: 0.1
+          maximum: 999.9
+        alto:
+          type: integer
+          minimum: 1
+        largo:
+          type: integer
+          minimum: 1
+        ancho:
+          type: integer
+          minimum: 1
       example:
-        precio: 17990
+        costo: 17990
         stock: 30
-        marca: "MarcaX"
+        peso: 0.6
 
     ProductosPaginados:
       type: object
@@ -669,7 +724,7 @@ components:
             id_tienda: 3
             nombre: "Mouse Gamer"
             stock: 25
-            precio: 19990
+            costo: 19990
             sku: "T3-MOUSE-GAMER-GENERAL-NUEVO"
             condicion: NUEVO
             fecha_creacion: "2025-01-10T12:00:00Z"
@@ -677,22 +732,15 @@ components:
             categoria: "GENERAL"
             descripcion: "Sin descripcion"
             activo: true
-          - id_producto: 2
-            id_tienda: 3
-            nombre: "Teclado Mecánico"
-            stock: 15
-            precio: 45990
-            sku: "T3-TECLADO-MECÁNICO-ELECTRÓNICA-NUEVO"
-            condicion: NUEVO
-            fecha_creacion: "2025-01-11T14:30:00Z"
-            marca: "Logitech"
-            categoria: "ELECTRÓNICA"
-            descripcion: "Teclado mecánico RGB con switches azules"
-            activo: true
+            foto_referencia: null
+            peso: 0.5
+            alto: 5
+            largo: 10
+            ancho: 8
         meta:
           page: 1
           take: 10
-          itemCount: 2
+          itemCount: 1
           pageCount: 1
           hasPreviousPage: false
           hasNextPage: false
@@ -736,7 +784,7 @@ components:
         id_tienda:
           type: integer
         id_vendedor:
-          type: integer
+          type: string
         nombre:
           type: string
         id_ciudad:
@@ -764,7 +812,7 @@ components:
         - online
       example:
         id_tienda: 3
-        id_vendedor: 456
+        id_vendedor: "507f1f77bcf86cd799439011"
         nombre: "CompuShop"
         id_ciudad: 1
         descripcion: "Tecnología y accesorios"
@@ -798,7 +846,7 @@ components:
       example:
         data:
           - id_tienda: 3
-            id_vendedor: 456
+            id_vendedor: "507f1f77bcf86cd799439011"
             nombre: "CompuShop"
             id_ciudad: 1
             descripcion: "Tecnología y accesorios"
