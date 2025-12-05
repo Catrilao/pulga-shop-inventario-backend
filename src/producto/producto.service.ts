@@ -34,7 +34,7 @@ export class ProductoService {
     const { id_tienda, ...losDemas } = createProductoDto;
 
     const tiendaExiste = await this.prisma.tienda.findUnique({
-      where: { id_tienda, activo: true },
+      where: { id_tienda: Number(createProductoDto.id_tienda) }, 
     });
     if (!tiendaExiste) {
       throw new NotFoundException({
@@ -111,12 +111,12 @@ export class ProductoService {
     roles: UserRoles,
   ): Promise<PageDto<GetProductoDto>> {
     if (
-      queryDto.precio_max &&
-      queryDto.precio_min &&
-      queryDto.precio_max < queryDto.precio_min
+      queryDto.costo_max &&
+      queryDto.costo_min &&
+      queryDto.costo_max < queryDto.costo_min
     ) {
       throw new BadRequestException({
-        message: 'El precio mínimo no puede ser mayor que el precio máximo',
+        message: 'El costo mínimo no puede ser mayor que el costo máximo',
         error: PRODUCTO_ERROR_CODES.PRECIO_INVALIDO,
       });
     }
@@ -128,15 +128,12 @@ export class ProductoService {
           ? { activo: false }
           : {}),
       ...(roles.esAdministrador ? {} : { tienda: { id_vendedor } }),
-      ...(queryDto.disponible !== undefined && {
-        disponible: queryDto.disponible,
-      }),
       ...(queryDto.id_tienda && { id_tienda: queryDto.id_tienda }),
-      ...(queryDto.precio_min || queryDto.precio_max
+      ...(queryDto.costo_min || queryDto.costo_max
         ? {
-            precio: {
-              ...(queryDto.precio_min && { gte: queryDto.precio_min }),
-              ...(queryDto.precio_max && { lte: queryDto.precio_max }),
+            costo: {
+              ...(queryDto.costo_min && { gte: queryDto.costo_min }),
+              ...(queryDto.costo_max && { lte: queryDto.costo_max }),
             },
           }
         : {}),

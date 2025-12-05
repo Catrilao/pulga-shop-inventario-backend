@@ -37,15 +37,10 @@ export class QueryProductoDto extends PageOptionsDto {
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  precio_min?: number;
+  costo_min?: number;
 
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  precio_max?: number;
-
-  @Transform(({ value }) => toBoolean(value))
-  @IsBoolean()
-  @IsOptional()
-  disponible?: boolean;
+  costo_max?: number;
 }
