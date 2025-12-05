@@ -737,10 +737,27 @@ components:
             alto: 5
             largo: 10
             ancho: 8
+          - id_producto: 2
+            id_tienda: 3
+            nombre: "Teclado Mecánico"
+            stock: 15
+            costo: 45990
+            sku: "T3-TECLADO-MECANICO-GENERAL-NUEVO"
+            condicion: NUEVO
+            fecha_creacion: "2025-01-11T14:30:00Z"
+            marca: "Genérica"
+            categoria: "ELECTRÓNICA"
+            descripcion: "Teclado mecánico RGB"
+            activo: true
+            foto_referencia: "https://cloudinary.com/teclado.jpg"
+            peso: 1.2
+            alto: 3
+            largo: 45
+            ancho: 15
         meta:
           page: 1
           take: 10
-          itemCount: 1
+          itemCount: 2
           pageCount: 1
           hasPreviousPage: false
           hasNextPage: false
@@ -854,10 +871,19 @@ components:
             telefono: "912345678"
             fecha_creacion: "2025-01-10T12:00:00Z"
             online: true
+          - id_tienda: 5
+            id_vendedor: "507f1f77bcf86cd799439011"
+            nombre: "FashionStore"
+            id_ciudad: 2
+            descripcion: "Ropa y accesorios de moda"
+            direccion: "Jr. Lima 456"
+            telefono: "987654321"
+            fecha_creacion: "2025-01-12T09:15:00Z"
+            online: false
         meta:
           page: 1
           take: 10
-          itemCount: 1
+          itemCount: 2
           pageCount: 1
           hasPreviousPage: false
           hasNextPage: false
