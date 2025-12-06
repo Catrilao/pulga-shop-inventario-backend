@@ -11,9 +11,9 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db_postgres:5432/pulga_shop?schema=public
       - REDIS_HOST=pulga-redis
       - REDIS_PORT=6379
-      - JWT_SECRET=EstoEsUnSecretoSuperSeguro
+      - JWT_SECRET=EstoEsUnSecretoSuperSeguroParaElCursoGPI
       - JWT_EXPIRES_IN=1d
-      - CORS_ORIGINS=http://localhost:16004,http://host.docker.internal:16004
+      - CORS_ORIGINS=http://localhost:16004,http://host.docker.internal:16004,http://localhost:5170,http://host.docker.internal:5170,http://localhost:4041,http://host.docker.internal:4041,http://localhost:6969,http://host.docker.internal:6969,http://localhost:3350,http://host.docker.internal:3350
       - CLOUDINARY_CLOUD_NAME=ddvkxibur
       - CLOUDINARY_API_KEY=312495811152233
       - CLOUDINARY_API_SECRET=DZrXMHKp_FssIcbtQBuv5kED70k
