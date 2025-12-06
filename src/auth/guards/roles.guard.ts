@@ -41,8 +41,13 @@ export class RolesGuard implements CanActivate {
       throw new UnauthorizedException('Usuario no autenticado');
     }
 
-    const esVendedor = await this.verifyVendedor(user.id);
-    const esAdministrador = await this.verifyAdministrador(user.id);
+    const token = this.extractTokenFromHeader(request);
+    if (!token) {
+      throw new UnauthorizedException('Token no proporcionado');
+    }
+
+    const esVendedor = await this.verifyVendedor(user.id, token);
+    const esAdministrador = await this.verifyAdministrador(user.id, token);
 
     const userRoles: UserRoles = {
       esVendedor,
@@ -72,7 +77,10 @@ export class RolesGuard implements CanActivate {
     });
   }
 
-  private async verifyAdministrador(id_usuario: number): Promise<boolean> {
+  private async verifyAdministrador(
+    id_usuario: number,
+    token: string,
+  ): Promise<boolean> {
     const redisClient = this.redisService.getClient();
     const cacheKey = `administrador:${id_usuario}`;
 
@@ -93,12 +101,15 @@ export class RolesGuard implements CanActivate {
 
     try {
       const response = await lastValueFrom(
-        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`),
+        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       );
 
-      const roles: string[] = response.data;
-      const esAdministrador =
-        Array.isArray(roles) && roles.includes('administrador');
+      const roles: string[] = response.data.roles;
+      const esAdministrador = Array.isArray(roles) && roles.includes('admin');
 
       await redisClient.set(cacheKey, esAdministrador.toString(), 'EX', 3600);
 
@@ -111,7 +122,10 @@ export class RolesGuard implements CanActivate {
     }
   }
 
-  private async verifyVendedor(id_usuario: number): Promise<boolean> {
+  private async verifyVendedor(
+    id_usuario: number,
+    token: string,
+  ): Promise<boolean> {
     const redisClient = this.redisService.getClient();
     const cacheKey = `vendedor:${id_usuario}`;
 
@@ -132,10 +146,14 @@ export class RolesGuard implements CanActivate {
 
     try {
       const response = await lastValueFrom(
-        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`),
+        this.httpService.get(`${process.env.SERVICIO_AUTH_URL}/auth/me`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
       );
 
-      const roles: string[] = response.data;
+      const roles: string[] = response.data.roles;
       const esVendedor = Array.isArray(roles) && roles.includes('vendedor');
 
       await redisClient.set(cacheKey, esVendedor.toString(), 'EX', 3600);
@@ -147,5 +165,10 @@ export class RolesGuard implements CanActivate {
       );
       throw new UnauthorizedException('Error al verificar el rol del usuario');
     }
+  }
+
+  private extractTokenFromHeader(request: any): string | undefined {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }
